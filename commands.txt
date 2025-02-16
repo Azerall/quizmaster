@@ -3,3 +3,5 @@ docker-compose down
 
 npm run dev
 go run main.go
+
+modify .env dans la racine et dans backend
