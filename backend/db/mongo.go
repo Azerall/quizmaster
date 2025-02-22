@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // structure de réponse pour la connexion
@@ -26,8 +27,10 @@ type LoginResponse struct {
 
 // se connecte à la base de données MongoDB
 func Connect() *mongo.Client {
+	log.Println("Connexion à la base de données")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(os.Getenv("MONGO_URI")))
 	if err != nil {
+		log.Println("Erreur lors du connexion à la base de données")
 		log.Fatal(err)
 	}
 	return client
@@ -37,8 +40,9 @@ func Connect() *mongo.Client {
 func Login(client *mongo.Client, username, password string) (LoginResponse, error) {
 	coll := client.Database("DB").Collection("users")
 
+	// 1. Récupérer l'utilisateur par son username uniquement
 	var user model.User
-	err := coll.FindOne(context.TODO(), bson.M{"username": username, "password": password}).Decode(&user)
+	err := coll.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return LoginResponse{Status: 401, Message: "Identifiants invalides"}, nil
@@ -46,8 +50,15 @@ func Login(client *mongo.Client, username, password string) (LoginResponse, erro
 		return LoginResponse{}, err
 	}
 
+	// 2. Comparer le mot de passe fourni avec celui haché en base
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return LoginResponse{Status: 401, Message: "Identifiants invalides"}, nil
+	}
+
 	log.Printf("Authentification réussie pour l'utilisateur %s\n", user.Username)
 
+	// 3. Génération d'un token (JWT recommandé)
 	token := time.Now().Format(time.RFC3339) + user.Username
 	objID, err := primitive.ObjectIDFromHex(user.ID)
 	_, err = coll.UpdateOne(
@@ -88,9 +99,11 @@ func InsertUser(client *mongo.Client, user model.User) (*mongo.InsertOneResult, 
 
 // UsernameExists vérifie si un nom d'utilisateur existe déjà dans la base de données
 func UsernameExists(client *mongo.Client, username string) (bool, error) {
+	log.Println("Recherche de l'utilisateur avec le nom d'utilisateur: ", username)
 	coll := client.Database("DB").Collection("users")
 	count, err := coll.CountDocuments(context.TODO(), bson.M{"username": username})
 	if err != nil {
+		log.Printf("Erreur lors de la recherche de l'utilisateur avec le nom d'utilisateur: %v\n", err)
 		return false, err
 	}
 	return count > 0, nil

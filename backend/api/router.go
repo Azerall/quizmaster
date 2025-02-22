@@ -22,7 +22,7 @@ func ConfigureRoutes() *mux.Router {
 	r.Use(request)       // appeler request pour chaque requête
 
 	// Handlers pour les endpoints de l'API utilisateur
-	r.HandleFunc("/api/user/createUser", handlers.CreateUserHandler).Methods("PUT")
+	r.HandleFunc("/api/user/createUser", handlers.CreateUserHandler).Methods("POST")
 	r.HandleFunc("/api/user/getall/", handlers.GetAllUsersHandler).Methods("GET")
 	r.HandleFunc("/api/user/getUserToken", handlers.GetUserTokenHandler).Methods("GET")
 	r.HandleFunc("/api/user/login", handlers.LoginHandler).Methods("POST")

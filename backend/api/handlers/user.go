@@ -9,13 +9,16 @@ import (
 	"quizmaster/model"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // création d'un nouvel utilisateur
+var jwtKey = []byte("secret_key") // À stocker de manière sécurisée
+
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Réception d'une requête POST sur /createUser")
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed) // Définir le code de statut de la réponse HTTP
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusMethodNotAllowed, Message: "Méthode non autorisée"})
 		return
 	}
@@ -23,39 +26,54 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var newUser model.User
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Données invalides"}) // Nombre de paramètres incorrect
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Données invalides"})
 		return
 	}
-	newUser.Experience = 0
-	newUser.Picture = "fizz.png"
 
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
-
-	log.Println(newUser.Username)
 
 	// Vérifier si le nom d'utilisateur existe déjà
 	exists, err := db.UsernameExists(client, newUser.Username)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification de l'existence du nom d'utilisateur"})
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification du nom d'utilisateur"})
 		return
 	}
 	if exists {
-		w.WriteHeader(http.StatusConflict) // Définir le code de statut de la réponse HTTP
+		w.WriteHeader(http.StatusConflict)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusConflict, Message: "Nom d'utilisateur déjà utilisé"})
 		return
 	}
 
-	result, err := db.InsertUser(client, newUser)
+	// Hachage du mot de passe
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors du hachage du mot de passe"})
+		return
+	}
+	newUser.Password = string(hashedPassword)
+
+	// Initialisation des valeurs par défaut
+	newUser.Level = 1
+	newUser.Coins = 0
+	newUser.Inventory = []model.Antiseche{}
+	newUser.Stats = model.Stats{PlayedQuizzes: 0, WinQuizzes: 0}
+
+	// Insertion en base
+	_, err = db.InsertUser(client, newUser)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de l'insertion de l'utilisateur"})
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated) // Ici, le statut est également envoyé dans le corps de la réponse pour cohérence
-	json.NewEncoder(w).Encode(model.ApiResponse{Status: 200, Message: "Utilisateur créé avec succès", Data: result})
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(model.ApiResponse{
+		Status:  http.StatusCreated,
+		Message: "Utilisateur créé avec succès",
+	})
 }
 
 // retourne tous les utilisateurs present dans la base de données
@@ -122,6 +140,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
 
+	log.Printf("Recherche de l'utilisateur avec le nom d'utilisateur: %s et le mot de passe: %s\n", credentials.Username, credentials.Password)
 	// Vérifier les identifiants de l'utilisateur et obtenir le token
 	loginResponse, err := db.Login(client, credentials.Username, credentials.Password)
 	if err != nil {
