@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Chevadisplay';
+  src: url('./assets/fonts/ChevadisplayRegular-1G5ve.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.chevadisplay-font {
+  font-family: 'Chevadisplay', sans-serif;
+}
