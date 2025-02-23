@@ -22,9 +22,9 @@ type Antiseche struct {
 }
 
 type Category struct {
-	UserID       string     `bson:"user_id"`
-	CategoryName string     `json:"category_name"`
-	Questions    []Question `json:"questions"`
+	UserID        string     `bson:"user_id"`
+	Category_Name string     `bson:"category_name"`
+	Questions     []Question `bson:"questions"`
 }
 
 type Quiz struct {

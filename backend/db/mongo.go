@@ -374,9 +374,9 @@ func CreateQuestion(client *mongo.Client, userID string, categoryName string, qu
 		if err == mongo.ErrNoDocuments {
 			// La catégorie n'existe pas, créer un nouveau document
 			newCategory := model.Category{
-				UserID:       userID,
-				CategoryName: categoryName,
-				Questions:    []model.Question{question},
+				UserID:        userID,
+				Category_Name: categoryName,
+				Questions:     []model.Question{question},
 			}
 			_, err = coll.InsertOne(context.TODO(), newCategory)
 			if err != nil {
