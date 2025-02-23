@@ -94,3 +94,57 @@ func AddStats(playerID string, quizID string) {
 	}
 
 }
+
+func CreateQuestionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusMethodNotAllowed, Message: "Méthode non autorisée"})
+		return
+	}
+
+	var QuestionData struct {
+		CategoryName string         `json:"category_name"`
+		Question     model.Question `json:"question"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&QuestionData); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Données invalides"})
+		return
+	}
+
+	client := db.Connect()
+	defer client.Disconnect(context.Background())
+
+	// Log des données reçues
+	log.Printf("Données reçues - Catégorie: %s, Question: %s", QuestionData.CategoryName, QuestionData.Question.QuestionText)
+
+	// Vérification de l'existence de la question
+	existQuestion, question, err := db.ExistQuestion(client, "67b9d9d77163bb4b523cbf71", QuestionData.CategoryName, QuestionData.Question)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification de l'existence de la question"})
+		return
+	}
+
+	if existQuestion {
+		// La question existe déjà
+		log.Printf("La question existe déjà: %v", question)
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusConflict, Message: "La question existe déjà", Data: question})
+		return
+	}
+
+	// Création de la question
+	err = db.CreateQuestion(client, "67b9d9d77163bb4b523cbf71", QuestionData.CategoryName, QuestionData.Question)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la création de la question"})
+		return
+	}
+
+	// Question créée avec succès
+	log.Printf("Question créée avec succès: %v", QuestionData.Question)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Question créée avec succès"})
+}

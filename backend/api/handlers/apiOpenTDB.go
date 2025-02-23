@@ -129,13 +129,13 @@ func GetQuizExternalHandler(w http.ResponseWriter, r *http.Request) {
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
 
-	// boolexist, existQuiz := db.ExistQuiz(client, quiz.UserID)
-	boolexist, existQuiz := db.ExistQuiz(client, "67b9d9d77163bb4b523cbf71")
+	// boolexist, onGoingQuiz := db.OnGoindQuiz(client, quiz.UserID)
+	boolexist, onGoingQuiz := db.OnGoindQuiz(client, "67b9d9d77163bb4b523cbf71")
 	if boolexist {
 		// je veux renvoyer le quiz existant
 		w.WriteHeader(http.StatusOK)
 		log.Println("Quiz récupéré avec succès")
-		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz récupéré avec succès", Data: existQuiz})
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz récupéré avec succès", Data: onGoingQuiz})
 		return
 	}
 

@@ -267,8 +267,8 @@ func UpdateUserPassword(client *mongo.Client, userID string, newPassword string)
 	return nil
 }
 
-// Verify if a Quiz already exists for a user
-func ExistQuiz(client *mongo.Client, playerID string) (bool, model.Quiz) {
+// Quiz non terminé par un utilisateur
+func OnGoindQuiz(client *mongo.Client, playerID string) (bool, model.Quiz) {
 	filter := bson.M{"user_id": playerID, "finish": false}
 
 	var quiz model.Quiz
@@ -361,4 +361,76 @@ func UpdateUser(client *mongo.Client, user model.User) (*mongo.UpdateResult, err
 		},
 	)
 
+}
+
+func CreateQuestion(client *mongo.Client, userID string, categoryName string, question model.Question) error {
+	coll := client.Database("DB").Collection("categories")
+	filter := bson.M{"category_name": categoryName}
+
+	// Vérifier si la catégorie existe déjà
+	var existingCategory model.Category
+	err := coll.FindOne(context.TODO(), filter).Decode(&existingCategory)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// La catégorie n'existe pas, créer un nouveau document
+			newCategory := model.Category{
+				UserID:       userID,
+				CategoryName: categoryName,
+				Questions:    []model.Question{question},
+			}
+			_, err = coll.InsertOne(context.TODO(), newCategory)
+			if err != nil {
+				log.Printf("Erreur lors de la création de la catégorie : %v", err)
+				return err
+			}
+			return nil
+		}
+		log.Printf("Erreur lors de la vérification de la catégorie : %v", err)
+		return err
+	}
+
+	// La catégorie existe, ajouter la question à la liste des questions
+	update := bson.M{
+		"$push": bson.M{"questions": question},
+	}
+	_, err = coll.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		log.Printf("Erreur MongoDB: %v", err)
+	}
+	return err
+}
+
+func ExistQuestion(client *mongo.Client, userID string, categoryName string, question model.Question) (bool, model.Question, error) {
+	// filter := bson.M{
+	// 	"user_id":       userID,
+	// 	"category_name": categoryName,
+	// 	"questions": bson.M{
+	// 		"$elemMatch": bson.M{"question_text": question.QuestionText},
+	// 	},
+	// }
+	filter := bson.M{
+		"user_id":                 userID,
+		"category_name":           categoryName,
+		"questions.question_text": question.QuestionText,
+	}
+
+	log.Printf("🔎 Recherche de la question avec le filtre: %+v", filter)
+
+	var result model.Category
+
+	coll := client.Database("DB").Collection("categories")
+	log.Println("collection existe : ", coll)
+	err := coll.FindOne(context.TODO(), filter).Decode(&result)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			log.Printf("🚨 Aucune question trouvée pour : %s", question.QuestionText)
+			return false, model.Question{}, nil
+		}
+		log.Printf("❌ Erreur MongoDB : %v", err)
+		return false, model.Question{}, err
+	}
+
+	log.Printf("✅ Question trouvée dans la catégorie %s", categoryName)
+	return true, question, nil
 }

@@ -21,6 +21,12 @@ type Antiseche struct {
 	Rarity int    `bson:"rarity"`
 }
 
+type Category struct {
+	UserID       string     `bson:"user_id"`
+	CategoryName string     `json:"category_name"`
+	Questions    []Question `json:"questions"`
+}
+
 type Quiz struct {
 	ID              string     `bson:"_id,omitempty"`
 	UserID          string     `bson:"user_id"`
