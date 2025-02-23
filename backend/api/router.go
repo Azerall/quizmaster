@@ -32,6 +32,10 @@ func ConfigureRoutes() *mux.Router {
 	r.HandleFunc("/api/user/changePassword/{userid}", handlers.UpdateUserPasswordHandler).Methods("PUT")
 	r.HandleFunc("/api/user/deleteUser/{userid}", handlers.DeleteUserHandler).Methods("DELETE")
 
+	// Handlers pour les endpoints de l'API quiz
+	r.HandleFunc("/api/quiz/getQuizByExternalAPI/{idplayer}/{category}", handlers.GetQuizExternalHandler).Methods("GET")
+	r.HandleFunc("/api/quiz/verifyAnswer", handlers.VerifyAnswer).Methods("POST")
+
 	buildDir := "../client/build"
 	fileServer := http.FileServer(http.Dir(buildDir))
 

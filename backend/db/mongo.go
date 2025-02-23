@@ -266,3 +266,99 @@ func UpdateUserPassword(client *mongo.Client, userID string, newPassword string)
 	log.Printf("Mot de passe de l'utilisateur mis à jour avec succès. Documents affectés: %v\n", result.ModifiedCount)
 	return nil
 }
+
+// Verify if a Quiz already exists for a user
+func ExistQuiz(client *mongo.Client, playerID string) (bool, model.Quiz) {
+	filter := bson.M{"user_id": playerID, "finish": false}
+
+	var quiz model.Quiz
+	coll := client.Database("DB").Collection("Quiz")
+	err := coll.FindOne(context.TODO(), filter).Decode(&quiz)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, model.Quiz{}
+		}
+		return false, model.Quiz{}
+	}
+	return true, quiz
+}
+
+// Create a Quiz by an external API
+func CreateQuizAPIExternal(client *mongo.Client, quiz model.Quiz) error {
+	coll := client.Database("DB").Collection("Quiz")
+	log.Println("Création d'un quiz par l'API externe")
+	_, err := primitive.ObjectIDFromHex(quiz.UserID)
+	if err != nil {
+		log.Printf("Erreur lors de la conversion de l'ID utilisateur en ObjectID : %v\n", err)
+		return err
+	}
+
+	_, err = coll.InsertOne(context.TODO(), quiz)
+	return err
+}
+
+func GetQuizByID(client *mongo.Client, quizID string) (model.Quiz, error) {
+	var quiz model.Quiz
+	collection := client.Database("DB").Collection("Quiz")
+
+	objID, err := primitive.ObjectIDFromHex(quizID)
+	if err != nil {
+		return quiz, err
+	}
+
+	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&quiz)
+	return quiz, err
+}
+
+func UpdateQuiz(client *mongo.Client, quiz model.Quiz) (*mongo.UpdateResult, error) {
+	coll := client.Database("DB").Collection("Quiz")
+	objID, err := primitive.ObjectIDFromHex(quiz.ID)
+	if err != nil {
+		log.Printf("Erreur lors de la conversion de l'ID du quiz en ObjectID : %v\n", err)
+		return nil, err
+	}
+
+	updateData := bson.M{
+		"user_id":         quiz.UserID,
+		"questions":       quiz.Questions,
+		"note":            quiz.Note,
+		"finish":          quiz.Finish,
+		"number_question": quiz.Number_question,
+	}
+
+	log.Printf("Mise à jour du quiz avec l'ID : %s\n", quiz.ID)
+	return coll.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": objID},
+		bson.M{
+			"$set": updateData,
+		},
+	)
+}
+
+func UpdateUser(client *mongo.Client, user model.User) (*mongo.UpdateResult, error) {
+	coll := client.Database("DB").Collection("users")
+	objID, err := primitive.ObjectIDFromHex(user.ID)
+	if err != nil {
+		log.Printf("Erreur lors de la conversion de l'ID utilisateur en ObjectID : %v\n", err)
+		return nil, err
+	}
+
+	updateData := bson.M{
+		"level":                user.Level,
+		"coins":                user.Coins,
+		"inventory":            user.Inventory,
+		"stats.quizzes_played": user.Stats.PlayedQuizzes,
+		"stats.quizzes_win":    user.Stats.WinQuizzes,
+	}
+
+	log.Printf("Mise à jour de l'inventaire de l'utilisateur avec l'ID : %s\n", user.ID)
+	return coll.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": objID},
+		bson.M{
+			"$set": updateData,
+		},
+	)
+
+}

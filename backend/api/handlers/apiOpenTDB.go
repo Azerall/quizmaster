@@ -108,6 +108,7 @@ func GetQuizExternalHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// LE FRONT ENVOIE DANS LE BACK, USERNAME DANS BODY ET AVEC L'USERNAME ON RECUPERE L'ID DU JOUEUR
 	// idplayer := r.Header.Get("Authorization")
 	// if idplayer == "" {
 	// 	http.Error(w, "Token manquant", http.StatusUnauthorized)
@@ -125,9 +126,6 @@ func GetQuizExternalHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// quiz := GetQuizHandlerByExternalAPI(idplayer, category)
-	quiz := GetQuizHandlerByExternalAPI("67b9d9d77163bb4b523cbf71", category)
-
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
 
@@ -136,9 +134,13 @@ func GetQuizExternalHandler(w http.ResponseWriter, r *http.Request) {
 	if boolexist {
 		// je veux renvoyer le quiz existant
 		w.WriteHeader(http.StatusOK)
+		log.Println("Quiz récupéré avec succès")
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz récupéré avec succès", Data: existQuiz})
 		return
 	}
+
+	// quiz := GetQuizHandlerByExternalAPI(idplayer, category)
+	quiz := GetQuizHandlerByExternalAPI("67b9d9d77163bb4b523cbf71", category)
 
 	err := db.CreateQuizAPIExternal(client, quiz)
 	if err != nil {
