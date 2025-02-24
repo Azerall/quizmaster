@@ -31,7 +31,7 @@ type Quiz struct {
 	ID              string     `bson:"_id,omitempty"`
 	UserID          string     `bson:"user_id"`
 	Questions       []Question `bson:"questions"`
-	Note            int        `bson:"note"`
+	Mark            int        `bson:"mark"`
 	Finish          bool       `bson:"finish"`
 	Number_question int        `bson:"number_question"`
 }

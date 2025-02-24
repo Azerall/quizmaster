@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"math/rand"
-    "time"
 	"quizmaster/db"
+	"time"
 
 	"net/http"
 	"quizmaster/model"
@@ -41,7 +41,7 @@ func VerifyAnswer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if quiz.Questions[quiz.Number_question].ResponseCorrect == requestData.Answer {
-		quiz.Note++
+		quiz.Mark += 1
 	}
 
 	quiz.Number_question++
@@ -151,15 +151,13 @@ func CreateQuestionHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Question créée avec succès"})
 }
 
-
 func Shuffle(questions []model.Question) []model.Question {
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(questions), func(i, j int) {
-        questions[i], questions[j] = questions[j], questions[i]
-    })
+		questions[i], questions[j] = questions[j], questions[i]
+	})
 	return questions
 }
-
 
 func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -169,8 +167,8 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var QuizData struct {
-		UserID          string   `json:"user_id"`
-		CategoryName    string   `json:"category_name"`
+		UserID       string `json:"user_id"`
+		CategoryName string `json:"category_name"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&QuizData); err != nil {
@@ -194,7 +192,7 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	quiz := model.Quiz{
 		UserID:          QuizData.UserID,
 		Questions:       shuffle_questions[:10],
-		Note:            0,
+		Mark:            0,
 		Finish:          false,
 		Number_question: 0,
 	}
@@ -211,4 +209,3 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz créé avec succès"})
 }
-

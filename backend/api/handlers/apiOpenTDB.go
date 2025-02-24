@@ -13,27 +13,27 @@ import (
 )
 
 var categoryMap = map[string]string{
-	"General Knowledge": "9",
-	"Books":            "10",
-	"Film":             "11",
-	"Music":            "12",
-	"Musicals & Theatres": "13",
-	"Television":       "14",
-	"Video Games":      "15",
-	"Board Games":      "16",
-	"Science & Nature": "17",
-	"Computers":        "18",
-	"Mathematics":      "19",
-	"Mythology": "20",
-	"Sports":    "21",
-	"History":   "23",
-	"Politics":  "24",
-	"Art":      "25",
-	"Celebrities": "26",
-	"Animals":    "27",
-	"Vehicles":   "28",
-	"Comics":     "29",
-	"Gadgets":    "30",
+	"General Knowledge":      "9",
+	"Books":                  "10",
+	"Film":                   "11",
+	"Music":                  "12",
+	"Musicals & Theatres":    "13",
+	"Television":             "14",
+	"Video Games":            "15",
+	"Board Games":            "16",
+	"Science & Nature":       "17",
+	"Computers":              "18",
+	"Mathematics":            "19",
+	"Mythology":              "20",
+	"Sports":                 "21",
+	"History":                "23",
+	"Politics":               "24",
+	"Art":                    "25",
+	"Celebrities":            "26",
+	"Animals":                "27",
+	"Vehicles":               "28",
+	"Comics":                 "29",
+	"Gadgets":                "30",
 	"Japanese Anime & Manga": "31",
 	"Cartoon & Animations":   "32",
 }
@@ -58,7 +58,7 @@ func toStringSlice(input interface{}) ([]string, error) {
 }
 
 // récuperation d'un quizz par un API externe
-func GetQuizHandlerByExternalAPI(idplayer string, category string) model.Quiz {
+func GenerateQuiz(idplayer string, category string) model.Quiz {
 	log.Println("Réception d'une requête GET sur /getQuizByExternalAPI")
 	url := "https://opentdb.com/api.php?amount=10&category=" + categoryMap[category] + "&difficulty=easy&type=multiple"
 	resp, err := http.Get(url)
@@ -114,14 +114,14 @@ func GetQuizHandlerByExternalAPI(idplayer string, category string) model.Quiz {
 	}
 
 	quiz.UserID = idplayer
-	quiz.Note = 0
+	quiz.Mark = 0
 	quiz.Finish = false
 	quiz.Number_question = 0
 
 	return quiz
 }
 
-func GetQuizExternalHandler(w http.ResponseWriter, r *http.Request) {
+func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Réception d'une requête GET sur /getQuizByExternalAPI")
 	if r.Method != http.MethodGet {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -159,8 +159,8 @@ func GetQuizExternalHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// quiz := GetQuizHandlerByExternalAPI(idplayer, category)
-	quiz := GetQuizHandlerByExternalAPI("67b9d9d77163bb4b523cbf71", category)
+	// quiz := GenerateQuiz(idplayer, category)
+	quiz := GenerateQuiz("67b9d9d77163bb4b523cbf71", category)
 
 	err := db.CreateQuiz(client, quiz)
 	if err != nil {

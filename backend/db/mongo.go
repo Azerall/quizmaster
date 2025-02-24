@@ -321,7 +321,7 @@ func UpdateQuiz(client *mongo.Client, quiz model.Quiz) (*mongo.UpdateResult, err
 	updateData := bson.M{
 		"user_id":         quiz.UserID,
 		"questions":       quiz.Questions,
-		"note":            quiz.Note,
+		"mark":            quiz.Mark,
 		"finish":          quiz.Finish,
 		"number_question": quiz.Number_question,
 	}
@@ -435,8 +435,7 @@ func ExistQuestion(client *mongo.Client, userID string, categoryName string, que
 	return true, question, nil
 }
 
-
-func GetQuestionsByCategory(client *mongo.Client, userID string, categoryName string) ([]model.Question) {
+func GetQuestionsByCategory(client *mongo.Client, userID string, categoryName string) []model.Question {
 	filter := bson.M{"user_id": userID, "category_name": categoryName}
 	var category model.Category
 	coll := client.Database("DB").Collection("categories")
