@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"math/rand"
 	"os"
 	"quizmaster/model"
 	"time"
@@ -444,4 +445,78 @@ func GetQuestionsByCategory(client *mongo.Client, userID string, categoryName st
 		return []model.Question{}
 	}
 	return category.Questions
+}
+
+func GetCheatSheet(client *mongo.Client, userID string, number_pull int) error {
+	coll := client.Database("DB").Collection("users")
+
+	// 🔍 Vérification de l'ObjectID
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		log.Printf("❌ Erreur ObjectID: %v\n", err)
+		return err
+	}
+
+	var user model.User
+	err = coll.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		log.Printf("❌ Erreur récupération utilisateur: %v\n", err)
+		return err
+	}
+
+	log.Printf("✅ Utilisateur trouvé: %v", user)
+
+	var price int = number_pull * 100
+	if number_pull == 10 {
+		price = 900
+	}
+
+	if user.Coins < price {
+		log.Printf("❌ Pas assez de pièces: %d disponibles, %d nécessaires\n", user.Coins, price)
+		return errors.New("Pas assez de pièces")
+	}
+
+	// Mise à jour de l'inventaire
+	for i := 0; i < number_pull; i++ {
+		randomValue := rand.Float64()
+		var rarity int
+		if randomValue <= 0.05 {
+			rarity = 5
+		} else if randomValue <= 0.2 {
+			rarity = 4
+		} else {
+			rarity = 3
+		}
+
+		// Trouver l'élément dans l'inventaire ou l'ajouter s'il n'existe pas
+		found := false
+		for j := range user.Inventory {
+			if user.Inventory[j].Rarity == rarity {
+				user.Inventory[j].Quantity++
+				found = true
+				break
+			}
+		}
+		if !found {
+			user.Inventory = append(user.Inventory, model.CheatSheet{Rarity: rarity, Quantity: 1})
+		}
+	}
+
+	user.Coins -= price
+	log.Printf("💰 Mise à jour des pièces: %d", user.Coins)
+
+	_, err = coll.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": objID},
+		bson.M{
+			"$set": bson.M{
+				"coins":     user.Coins,
+				"inventory": user.Inventory,
+			},
+		},
+	)
+	if err != nil {
+		log.Printf("❌ Erreur mise à jour MongoDB: %v\n", err)
+	}
+	return err
 }
