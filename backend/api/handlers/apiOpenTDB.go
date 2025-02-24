@@ -13,9 +13,29 @@ import (
 )
 
 var categoryMap = map[string]string{
+	"General Knowledge": "9",
+	"Books":            "10",
+	"Film":             "11",
+	"Music":            "12",
+	"Musicals & Theatres": "13",
+	"Television":       "14",
+	"Video Games":      "15",
+	"Board Games":      "16",
+	"Science & Nature": "17",
+	"Computers":        "18",
+	"Mathematics":      "19",
 	"Mythology": "20",
 	"Sports":    "21",
 	"History":   "23",
+	"Politics":  "24",
+	"Art":      "25",
+	"Celebrities": "26",
+	"Animals":    "27",
+	"Vehicles":   "28",
+	"Comics":     "29",
+	"Gadgets":    "30",
+	"Japanese Anime & Manga": "31",
+	"Cartoon & Animations":   "32",
 }
 
 // Fonction pour convertir un tableau d'interface{} en tableau de string
@@ -142,7 +162,7 @@ func GetQuizExternalHandler(w http.ResponseWriter, r *http.Request) {
 	// quiz := GetQuizHandlerByExternalAPI(idplayer, category)
 	quiz := GetQuizHandlerByExternalAPI("67b9d9d77163bb4b523cbf71", category)
 
-	err := db.CreateQuizAPIExternal(client, quiz)
+	err := db.CreateQuiz(client, quiz)
 	if err != nil {
 		http.Error(w, "Erreur lors de l'insertion du quiz", http.StatusInternalServerError)
 		return

@@ -283,8 +283,8 @@ func OnGoindQuiz(client *mongo.Client, playerID string) (bool, model.Quiz) {
 	return true, quiz
 }
 
-// Create a Quiz by an external API
-func CreateQuizAPIExternal(client *mongo.Client, quiz model.Quiz) error {
+// Create a Quiz
+func CreateQuiz(client *mongo.Client, quiz model.Quiz) error {
 	coll := client.Database("DB").Collection("Quiz")
 	log.Println("Création d'un quiz par l'API externe")
 	_, err := primitive.ObjectIDFromHex(quiz.UserID)
@@ -433,4 +433,16 @@ func ExistQuestion(client *mongo.Client, userID string, categoryName string, que
 
 	log.Printf("✅ Question trouvée dans la catégorie %s", categoryName)
 	return true, question, nil
+}
+
+
+func GetQuestionsByCategory(client *mongo.Client, userID string, categoryName string) ([]model.Question) {
+	filter := bson.M{"user_id": userID, "category_name": categoryName}
+	var category model.Category
+	coll := client.Database("DB").Collection("categories")
+	err := coll.FindOne(context.TODO(), filter).Decode(&category)
+	if err != nil {
+		return []model.Question{}
+	}
+	return category.Questions
 }
