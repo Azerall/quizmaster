@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import url('tailwindcss/base');
+@import url('tailwindcss/components');
+@import url('tailwindcss/utilities');
 
 @font-face {
   font-family: 'Chevadisplay';
@@ -9,4 +12,12 @@
 
 .chevadisplay-font {
   font-family: 'Chevadisplay', sans-serif;
+}
+
+body {
+  background-image: url('./assets/background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
 }
