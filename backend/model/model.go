@@ -1,14 +1,15 @@
 package model
 
 type User struct {
-	ID        string      `bson:"_id,omitempty"`
-	Username  string      `bson:"username"`
-	Password  string      `bson:"password"`
-	Token     string      `bson:"token"`
-	Level     int         `bson:"level"`
-	Coins     int         `bson:"coins"`
-	Inventory []Antiseche `bson:"inventory"`
-	Stats     Stats       `bson:"stats"`
+	ID       string `bson:"_id,omitempty"`
+	Username string `bson:"username"`
+	Password string `bson:"password"`
+	Token    string `bson:"token"`
+	Level    int    `bson:"level"`
+	Coins    int    `bson:"coins"`
+	// Inventory map[int]int `bson:"inventory"` // map[rarity]quantity
+	Inventory []CheatSheet `bson:"inventory"`
+	Stats     Stats        `bson:"stats"`
 }
 
 type Stats struct {
@@ -16,9 +17,9 @@ type Stats struct {
 	WinQuizzes    int `bson:"quizzes_win" json:"quizzes_win"`
 }
 
-type Antiseche struct {
-	UserID string `bson:"user_id"`
-	Rarity int    `bson:"rarity"`
+type CheatSheet struct {
+	Rarity   int `bson:"rarity" json:"rarity"`
+	Quantity int `bson:"quantity" json:"quantity"`
 }
 
 type Category struct {
