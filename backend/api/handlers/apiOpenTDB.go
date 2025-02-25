@@ -168,13 +168,6 @@ func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// collection := client.Database("DB").Collection("Quiz")
-	// _, err := collection.InsertOne(context.TODO(), quiz)
-	// if err != nil {
-	// 	http.Error(w, "Erreur lors de l'insertion du quiz", http.StatusInternalServerError)
-	// 	return
-	// }
-
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz généré avec succès", Data: quiz})
 }

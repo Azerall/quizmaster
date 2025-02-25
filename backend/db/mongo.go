@@ -402,13 +402,6 @@ func CreateQuestion(client *mongo.Client, userID string, categoryName string, qu
 }
 
 func ExistQuestion(client *mongo.Client, userID string, categoryName string, question model.Question) (bool, model.Question, error) {
-	// filter := bson.M{
-	// 	"user_id":       userID,
-	// 	"category_name": categoryName,
-	// 	"questions": bson.M{
-	// 		"$elemMatch": bson.M{"question_text": question.QuestionText},
-	// 	},
-	// }
 	filter := bson.M{
 		"user_id":                 userID,
 		"category_name":           categoryName,

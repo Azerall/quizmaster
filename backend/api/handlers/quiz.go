@@ -72,13 +72,6 @@ func AddStats(playerID string, quizID string) {
 	client := db.Connect()
 	defer client.Disconnect(context.Background())
 
-	// quiz, err := db.GetQuizByID(client, quizID)
-	_, err := db.GetQuizByID(client, quizID) // On ne fait rien avec le quiz pour l'instant vu qu'on sait pas quel stats augmenter
-	if err != nil {
-		log.Printf("Erreur lors de la récupération du quiz : %v\n", err)
-		return
-	}
-
 	user, err := db.GetUserByID(client, playerID)
 	if err != nil {
 		log.Printf("Erreur lors de la récupération de l'utilisateur : %v\n", err)
