@@ -1,13 +1,12 @@
 package model
 
 type User struct {
-	ID       string `bson:"_id,omitempty"`
-	Username string `bson:"username"`
-	Password string `bson:"password"`
-	Token    string `bson:"token"`
-	Level    int    `bson:"level"`
-	Coins    int    `bson:"coins"`
-	// Inventory map[int]int `bson:"inventory"` // map[rarity]quantity
+	ID        string       `bson:"_id,omitempty"`
+	Username  string       `bson:"username"`
+	Password  string       `bson:"password"`
+	Token     string       `bson:"token"`
+	Level     int          `bson:"level"`
+	Coins     int          `bson:"coins"`
 	Inventory []CheatSheet `bson:"inventory"`
 	Stats     Stats        `bson:"stats"`
 }
@@ -23,14 +22,14 @@ type CheatSheet struct {
 }
 
 type Category struct {
-	UserID        string     `bson:"user_id"`
-	Category_Name string     `bson:"category_name"`
-	Questions     []Question `bson:"questions"`
+	Username     string     `bson:"username"`
+	CategoryName string     `bson:"categoryname"`
+	Questions    []Question `bson:"questions"`
 }
 
 type Quiz struct {
 	ID              string     `bson:"_id,omitempty"`
-	UserID          string     `bson:"user_id"`
+	Username        string     `bson:"username"`
 	Questions       []Question `bson:"questions"`
 	Mark            int        `bson:"mark"`
 	Finish          bool       `bson:"finish"`

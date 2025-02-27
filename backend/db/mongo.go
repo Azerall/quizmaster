@@ -143,6 +143,17 @@ func GetUserByID(client *mongo.Client, userID string) (model.User, error) {
 	return user, err
 }
 
+func GetUserByName(client *mongo.Client, username string) (model.User, error) {
+	var user model.User
+	collection := client.Database("DB").Collection("users")
+
+	err := collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
 // GetUserByToken recherche un utilisateur par son token dans la base de données
 func GetUserByToken(client *mongo.Client, token string) (model.User, error) {
 	var user model.User
@@ -268,9 +279,21 @@ func UpdateUserPassword(client *mongo.Client, userID string, newPassword string)
 	return nil
 }
 
+func GetUserByUsername(client *mongo.Client, username string) (model.User, error) {
+	var user model.User
+	collection := client.Database("DB").Collection("users")
+
+	err := collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
+	if err != nil {
+		log.Printf("Erreur lors de la recherche de l'utilisateur: %v\n", err)
+		return user, err
+	}
+	return user, nil
+}
+
 // Quiz non terminé par un utilisateur
-func OnGoindQuiz(client *mongo.Client, playerID string) (bool, model.Quiz) {
-	filter := bson.M{"user_id": playerID, "finish": false}
+func OnGoindQuiz(client *mongo.Client, userName string) (bool, model.Quiz) {
+	filter := bson.M{"username": userName, "finish": false}
 
 	var quiz model.Quiz
 	coll := client.Database("DB").Collection("Quiz")
@@ -288,13 +311,7 @@ func OnGoindQuiz(client *mongo.Client, playerID string) (bool, model.Quiz) {
 func CreateQuiz(client *mongo.Client, quiz model.Quiz) error {
 	coll := client.Database("DB").Collection("Quiz")
 	log.Println("Création d'un quiz par l'API externe")
-	_, err := primitive.ObjectIDFromHex(quiz.UserID)
-	if err != nil {
-		log.Printf("Erreur lors de la conversion de l'ID utilisateur en ObjectID : %v\n", err)
-		return err
-	}
-
-	_, err = coll.InsertOne(context.TODO(), quiz)
+	_, err := coll.InsertOne(context.TODO(), quiz)
 	return err
 }
 
@@ -320,7 +337,7 @@ func UpdateQuiz(client *mongo.Client, quiz model.Quiz) (*mongo.UpdateResult, err
 	}
 
 	updateData := bson.M{
-		"user_id":         quiz.UserID,
+		"username":        quiz.Username,
 		"questions":       quiz.Questions,
 		"mark":            quiz.Mark,
 		"finish":          quiz.Finish,
@@ -364,9 +381,9 @@ func UpdateUser(client *mongo.Client, user model.User) (*mongo.UpdateResult, err
 
 }
 
-func CreateQuestion(client *mongo.Client, userID string, categoryName string, question model.Question) error {
+func CreateQuestion(client *mongo.Client, userName string, categoryName string, question model.Question) error {
 	coll := client.Database("DB").Collection("categories")
-	filter := bson.M{"category_name": categoryName}
+	filter := bson.M{"categoryname": categoryName}
 
 	// Vérifier si la catégorie existe déjà
 	var existingCategory model.Category
@@ -375,9 +392,9 @@ func CreateQuestion(client *mongo.Client, userID string, categoryName string, qu
 		if err == mongo.ErrNoDocuments {
 			// La catégorie n'existe pas, créer un nouveau document
 			newCategory := model.Category{
-				UserID:        userID,
-				Category_Name: categoryName,
-				Questions:     []model.Question{question},
+				Username:     userName,
+				CategoryName: categoryName,
+				Questions:    []model.Question{question},
 			}
 			_, err = coll.InsertOne(context.TODO(), newCategory)
 			if err != nil {
@@ -401,10 +418,10 @@ func CreateQuestion(client *mongo.Client, userID string, categoryName string, qu
 	return err
 }
 
-func ExistQuestion(client *mongo.Client, userID string, categoryName string, question model.Question) (bool, model.Question, error) {
+func ExistQuestion(client *mongo.Client, userName string, categoryName string, question model.Question) (bool, model.Question, error) {
 	filter := bson.M{
-		"user_id":                 userID,
-		"category_name":           categoryName,
+		"username":                userName,
+		"categoryname":            categoryName,
 		"questions.question_text": question.QuestionText,
 	}
 
@@ -429,8 +446,8 @@ func ExistQuestion(client *mongo.Client, userID string, categoryName string, que
 	return true, question, nil
 }
 
-func GetQuestionsByCategory(client *mongo.Client, userID string, categoryName string) []model.Question {
-	filter := bson.M{"user_id": userID, "category_name": categoryName}
+func GetQuestionsByCategory(client *mongo.Client, userName string, categoryName string) []model.Question {
+	filter := bson.M{"username": userName, "categoryname": categoryName}
 	var category model.Category
 	coll := client.Database("DB").Collection("categories")
 	err := coll.FindOne(context.TODO(), filter).Decode(&category)
@@ -440,18 +457,11 @@ func GetQuestionsByCategory(client *mongo.Client, userID string, categoryName st
 	return category.Questions
 }
 
-func GetCheatSheet(client *mongo.Client, userID string, number_pull int) error {
+func GetCheatSheet(client *mongo.Client, userName string, number_pull int) error {
 	coll := client.Database("DB").Collection("users")
 
-	// 🔍 Vérification de l'ObjectID
-	objID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		log.Printf("❌ Erreur ObjectID: %v\n", err)
-		return err
-	}
-
 	var user model.User
-	err = coll.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
+	err := coll.FindOne(context.TODO(), bson.M{"username": userName}).Decode(&user)
 	if err != nil {
 		log.Printf("❌ Erreur récupération utilisateur: %v\n", err)
 		return err
@@ -500,7 +510,7 @@ func GetCheatSheet(client *mongo.Client, userID string, number_pull int) error {
 
 	_, err = coll.UpdateOne(
 		context.TODO(),
-		bson.M{"_id": objID},
+		bson.M{"username": userName},
 		bson.M{
 			"$set": bson.M{
 				"coins":     user.Coins,

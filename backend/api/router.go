@@ -33,14 +33,13 @@ func ConfigureRoutes() *mux.Router {
 	r.HandleFunc("/api/user/deleteUser/{userid}", handlers.DeleteUserHandler).Methods("DELETE")
 
 	// Handlers pour les endpoints de l'API quiz
-	r.HandleFunc("/api/quiz/getQuizByExternalAPI/{userid}/{category}", handlers.GenerateQuizHandler).Methods("GET")
+	r.HandleFunc("/api/quiz/getQuizByExternalAPI/{category}", handlers.GenerateQuizHandler).Methods("GET")
 	r.HandleFunc("/api/quiz/verifyAnswer", handlers.VerifyAnswer).Methods("POST")
-	r.HandleFunc("/api/quiz/createQuestion/{userid}", handlers.CreateQuestionHandler).Methods("POST")
-	r.HandleFunc("/api/quiz/createQuiz/{userid}/{category}", handlers.CreateQuizHandler).Methods("POST")
+	r.HandleFunc("/api/quiz/createQuestion", handlers.CreateQuestionHandler).Methods("POST")
+	r.HandleFunc("/api/quiz/createQuiz/{category}", handlers.CreateQuizHandler).Methods("POST")
 
 	// Handlers pour les endpoints de l'API gacha
-	r.HandleFunc("/api/gacha/pullSingle/{userid}", handlers.PullSingleHandler).Methods("POST")
-	r.HandleFunc("/api/gacha/pullMulti/{userid}", handlers.PullMultiHandler).Methods("POST")
+	r.HandleFunc("/api/gacha/pull", handlers.PullHandler).Methods("POST")
 
 	buildDir := "../client/build"
 	fileServer := http.FileServer(http.Dir(buildDir))

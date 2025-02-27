@@ -58,7 +58,7 @@ func toStringSlice(input interface{}) ([]string, error) {
 }
 
 // récuperation d'un quizz par un API externe
-func GenerateQuiz(idplayer string, category string) model.Quiz {
+func GenerateQuiz(userName string, category string) model.Quiz {
 	log.Println("Réception d'une requête GET sur /getQuizByExternalAPI")
 	url := "https://opentdb.com/api.php?amount=10&category=" + categoryMap[category] + "&difficulty=easy&type=multiple"
 	resp, err := http.Get(url)
@@ -113,7 +113,7 @@ func GenerateQuiz(idplayer string, category string) model.Quiz {
 		})
 	}
 
-	quiz.UserID = idplayer
+	quiz.Username = userName
 	quiz.Mark = 0
 	quiz.Finish = false
 	quiz.Number_question = 0
@@ -128,39 +128,29 @@ func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// LE FRONT ENVOIE DANS LE BACK, USERNAME DANS BODY ET AVEC L'USERNAME ON RECUPERE L'ID DU JOUEUR
-	// idplayer := r.Header.Get("Authorization")
-	// if idplayer == "" {
-	// 	http.Error(w, "Token manquant", http.StatusUnauthorized)
-	// 	return
-	// }
-
-	var category string
-	if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
-		http.Error(w, "Erreur lors du décodage de la catégorie", http.StatusBadRequest)
-		return
+	var request struct {
+		Username string `json:"username"`
+		Category string `json:"category"`
 	}
 
-	if category == "" {
-		http.Error(w, "Catégorie manquante", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Données invalides", http.StatusBadRequest)
 		return
 	}
 
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
 
-	// boolexist, onGoingQuiz := db.OnGoindQuiz(client, quiz.UserID)
-	boolexist, onGoingQuiz := db.OnGoindQuiz(client, "67b9d9d77163bb4b523cbf71")
+	// boolexist, onGoingQuiz := db.OnGoindQuiz(client, "67b9d9d77163bb4b523cbf71")
+	boolexist, onGoingQuiz := db.OnGoindQuiz(client, request.Username)
 	if boolexist {
-		// je veux renvoyer le quiz existant
 		w.WriteHeader(http.StatusOK)
 		log.Println("Quiz récupéré avec succès")
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz récupéré avec succès", Data: onGoingQuiz})
 		return
 	}
 
-	// quiz := GenerateQuiz(idplayer, category)
-	quiz := GenerateQuiz("67b9d9d77163bb4b523cbf71", category)
+	quiz := GenerateQuiz(request.Username, request.Category)
 
 	err := db.CreateQuiz(client, quiz)
 	if err != nil {

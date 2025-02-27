@@ -47,7 +47,7 @@ func VerifyAnswer(w http.ResponseWriter, r *http.Request) {
 	quiz.Number_question++
 	if quiz.Number_question == len(quiz.Questions) {
 		quiz.Finish = true
-		AddStats(quiz.UserID, quiz.ID)
+		AddStats(quiz.Username, quiz.ID)
 	}
 
 	log.Printf("Mise à jour du quiz avec l'ID : %s\n", quiz.ID)
@@ -68,11 +68,11 @@ func VerifyAnswer(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: responseMessage})
 }
 
-func AddStats(playerID string, quizID string) {
+func AddStats(userName string, quizID string) {
 	client := db.Connect()
 	defer client.Disconnect(context.Background())
 
-	user, err := db.GetUserByID(client, playerID)
+	user, err := db.GetUserByName(client, userName)
 	if err != nil {
 		log.Printf("Erreur lors de la récupération de l'utilisateur : %v\n", err)
 		return
@@ -98,7 +98,8 @@ func CreateQuestionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var QuestionData struct {
-		CategoryName string         `json:"category_name"`
+		Username     string         `json:"username"`
+		CategoryName string         `json:"categoryname"`
 		Question     model.Question `json:"question"`
 	}
 
@@ -115,7 +116,7 @@ func CreateQuestionHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Données reçues - Catégorie: %s, Question: %s", QuestionData.CategoryName, QuestionData.Question.QuestionText)
 
 	// Vérification de l'existence de la question
-	existQuestion, question, err := db.ExistQuestion(client, "67b9d9d77163bb4b523cbf71", QuestionData.CategoryName, QuestionData.Question)
+	existQuestion, question, err := db.ExistQuestion(client, QuestionData.Username, QuestionData.CategoryName, QuestionData.Question)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification de l'existence de la question"})
@@ -131,7 +132,7 @@ func CreateQuestionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Création de la question
-	err = db.CreateQuestion(client, "67b9d9d77163bb4b523cbf71", QuestionData.CategoryName, QuestionData.Question)
+	err = db.CreateQuestion(client, QuestionData.Username, QuestionData.CategoryName, QuestionData.Question)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la création de la question"})
@@ -160,8 +161,8 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var QuizData struct {
-		UserID       string `json:"user_id"`
-		CategoryName string `json:"category_name"`
+		Username     string `json:"username"`
+		CategoryName string `json:"categoryname"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&QuizData); err != nil {
@@ -173,8 +174,9 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	client := db.Connect()
 	defer client.Disconnect(context.Background())
 
-	allquestions := db.GetQuestionsByCategory(client, "67b9d9d77163bb4b523cbf71", QuizData.CategoryName)
+	allquestions := db.GetQuestionsByCategory(client, QuizData.Username, QuizData.CategoryName)
 	if len(allquestions) < 10 {
+		log.Printf("Nombre de questions insuffisant: %d", len(allquestions))
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Nombre de questions insuffisant"})
 		return
@@ -183,7 +185,7 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	shuffle_questions := Shuffle(allquestions)
 
 	quiz := model.Quiz{
-		UserID:          QuizData.UserID,
+		Username:        QuizData.Username,
 		Questions:       shuffle_questions[:10],
 		Mark:            0,
 		Finish:          false,
