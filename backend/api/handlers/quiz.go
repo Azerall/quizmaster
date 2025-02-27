@@ -150,6 +150,14 @@ func Shuffle(questions []model.Question) []model.Question {
 	rand.Shuffle(len(questions), func(i, j int) {
 		questions[i], questions[j] = questions[j], questions[i]
 	})
+
+	for i, question := range questions {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(question.Responses), func(i, j int) {
+			question.Responses[i], question.Responses[j] = question.Responses[j], question.Responses[i]
+		})
+		questions[i] = question
+	}
 	return questions
 }
 
