@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const MainPage = () => {
-  // Données fictives en attendant les requêtes backend
   const [classement] = useState([
     { username: "Joueur A", niveau: 50 },
     { username: "Joueur B", niveau: 45 },
@@ -12,44 +11,60 @@ const MainPage = () => {
     username: "JoueurX",
     niveau: 38,
     credit: 1200,
-    photo: "https://via.placeholder.com/100", // Image temporaire
+    photo: "/images/profils/silver_wolf.png",
   });
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-8 bg-transparent">
+    <div className="h-screen flex flex-col bg-transparent">
       {/* Contenu principal */}
-      <div className="flex w-full max-w-5xl justify-between gap-8">
-        {/* Classement (à gauche) */}
-        <div className="w-1/3 bg-[#292047] text-white shadow-lg p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">🏆 Classement des joueurs</h2>
-          <ul>
-            {classement.map((player, index) => (
-              <li key={index} className="py-1">
-                {index + 1}. {player.username} - Niveau {player.niveau}
-              </li>
-            ))}
-          </ul>
+      <div className="flex flex-col items-center pt-8 pb-4 flex-grow">
+        <div className="relative w-full max-w-md">
+          {/* Partie haute avec tiles.jpg */}
+          <div
+            className="w-full h-48 bg-cover bg-center rounded-t-lg"
+            style={{ backgroundImage: "url('/images/tiles.jpg')" }}
+          >
+            {/* Image de profil centrée */}
+            <div className="absolute top-7 left-1/2 transform -translate-x-1/2">
+              <div
+                className="w-35 h-35 bg-[#E470A3] rounded-full flex items-center justify-center border-4 border-white"
+                style={{
+                  boxShadow: "0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.8)",
+                }}
+              >
+                <img src={profil.photo} alt="Profil" className="w-full h-full rounded-full object-cover" />
+              </div>
+            </div>
+          </div>
+          {/* Informations du profil */}
+          <div className="bg-[#292047] text-white shadow-lg p-6 rounded-b-lg">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-[#E470A3]">{profil.username}</h2>
+              <p className="text-[#9A60D1]">Niveau : {profil.niveau}</p>
+              <p className="text-[#9A60D1]">Crédits : {profil.credit} 💎</p>
+            </div>
+          </div>
+          {/* Pseudo-élément pour la lueur courbée */}
+          <div className="absolute inset-0 rounded-lg pointer-events-none"
+            style={{
+              boxShadow: "0 0 15px rgba(64, 196, 255, 0.7), 0 0 30px rgba(64, 196, 255, 0.5)",
+              zIndex: -1, // Derrière le contenu
+            }}
+          />
         </div>
-
-        {/* Profil (au centre, en haut, avec fond) */}
-        <div className="flex flex-col items-center w-1/3 bg-[#292047] text-white shadow-lg p-6 rounded-lg">
-          <img src={profil.photo} alt="Profil" className="w-24 h-24 rounded-full border-4 border-[#E470A3] mb-4" />
-          <h2 className="text-2xl font-bold">{profil.username}</h2>
-          <p className="text-gray-300">Niveau : {profil.niveau}</p>
-          <p className="text-gray-300">Crédits : {profil.credit} 🪙</p>
+        {/* Bouton JOUER */}
+        <div className="mt-12">
+          <button
+            className="px-10 py-4 text-xl font-bold text-white rounded-lg transition-transform transform hover:scale-105"
+            style={{
+              background: "linear-gradient(90deg, #E470A3, #9A60D1)",
+              boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6), 0px 0px 25px rgba(228, 112, 163, 0.4)",
+            }}
+          >
+            🎮 JOUER
+          </button>
         </div>
       </div>
-
-      {/* Bouton JOUER bien centré en bas */}
-      <button
-        className="mt-8 px-10 py-4 text-xl font-bold text-white rounded-lg transition-transform transform hover:scale-105"
-        style={{
-          background: "linear-gradient(90deg, #E470A3, #9A60D1)",
-          boxShadow: "0px 4px 10px rgba(228, 112, 163, 0.5)",
-        }}
-      >
-        🎮 JOUER
-      </button>
     </div>
   );
 };
