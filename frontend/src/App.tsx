@@ -4,6 +4,7 @@ import MainPage from "./pages/MainPage";
 import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import { JSX } from "react";
+import GachaPage from "./pages/GachaPage";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
     const { token } = useAuth();
@@ -27,6 +28,7 @@ function App() {
                         </ProtectedRoute>
                     } 
                 />
+                <Route path="/gacha" element={<GachaPage />} />
                 <Route path="/signin" element={<AuthForm isSignup={false} />} />
                 <Route path="/signup" element={<AuthForm isSignup={true} />} />
             </Routes>
