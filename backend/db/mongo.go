@@ -457,14 +457,14 @@ func GetQuestionsByCategory(client *mongo.Client, userName string, categoryName 
 	return category.Questions
 }
 
-func GetCheatSheet(client *mongo.Client, userName string, number_pull int) error {
+func GetCheatSheet(client *mongo.Client, userName string, number_pull int) ([]int, error) {
 	coll := client.Database("DB").Collection("users")
 
 	var user model.User
 	err := coll.FindOne(context.TODO(), bson.M{"username": userName}).Decode(&user)
 	if err != nil {
 		log.Printf("❌ Erreur récupération utilisateur: %v\n", err)
-		return err
+		return nil, err
 	}
 
 	log.Printf("✅ Utilisateur trouvé: %v", user)
@@ -476,8 +476,10 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) error
 
 	if user.Coins < price {
 		log.Printf("❌ Pas assez de pièces: %d disponibles, %d nécessaires\n", user.Coins, price)
-		return errors.New("Pas assez de pièces")
+		return nil, errors.New("Pas assez de pièces")
 	}
+
+	var result []int
 
 	// Mise à jour de l'inventaire
 	for i := 0; i < number_pull; i++ {
@@ -496,12 +498,14 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) error
 		for j := range user.Inventory {
 			if user.Inventory[j].Rarity == rarity {
 				user.Inventory[j].Quantity++
+				result = append(result, rarity)
 				found = true
 				break
 			}
 		}
 		if !found {
 			user.Inventory = append(user.Inventory, model.CheatSheet{Rarity: rarity, Quantity: 1})
+			result = append(result, rarity)
 		}
 	}
 
@@ -521,5 +525,5 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) error
 	if err != nil {
 		log.Printf("❌ Erreur mise à jour MongoDB: %v\n", err)
 	}
-	return err
+	return result, err
 }

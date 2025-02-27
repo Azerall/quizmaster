@@ -34,12 +34,12 @@ func PullHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.GetCheatSheet(client, requestData.Username, requestData.Quantity)
+	result, err := db.GetCheatSheet(client, requestData.Username, requestData.Quantity)
 	if err != nil {
 		http.Error(w, "Erreur lors de la génération d'un anti-seche", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: message})
+	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: message, Data: result})
 }
