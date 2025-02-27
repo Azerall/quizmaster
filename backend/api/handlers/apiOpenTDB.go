@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"quizmaster/db"
+	"time"
 
 	"net/http"
 	"quizmaster/model"
@@ -106,9 +108,16 @@ func GenerateQuiz(userName string, category string) model.Quiz {
 			continue
 		}
 
+		allAnswers := append(incorrectAnswers, correctAnswer)
+		// Mélange des réponses
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(allAnswers), func(i, j int) {
+			allAnswers[i], allAnswers[j] = allAnswers[j], allAnswers[i]
+		})
+
 		quiz.Questions = append(quiz.Questions, model.Question{
 			QuestionText:    questionMap["question"].(string),
-			Responses:       append(incorrectAnswers, correctAnswer),
+			Responses:       allAnswers,
 			ResponseCorrect: correctAnswer,
 		})
 	}
