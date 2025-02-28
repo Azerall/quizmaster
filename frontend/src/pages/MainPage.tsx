@@ -1,6 +1,13 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const MainPage = () => {
+  const { user } = useAuth();
+  
+  if (true) {
+    console.log(user);
+  }
+
   const [classement] = useState([
     { username: "Joueur A", niveau: 50 },
     { username: "Joueur B", niveau: 45 },
@@ -39,9 +46,9 @@ const MainPage = () => {
           {/* Informations du profil */}
           <div className="bg-[#292047] text-white shadow-lg p-6 rounded-b-lg">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-[#E470A3]">{profil.username}</h2>
-              <p className="text-[#9A60D1]">Niveau : {profil.niveau}</p>
-              <p className="text-[#9A60D1]">Crédits : {profil.credit} 💎</p>
+              <h2 className="text-2xl font-bold text-[#E470A3]">{user?.Username}</h2>
+              <p className="text-[#9A60D1]">Niveau : {user?.Level}</p>
+              <p className="text-[#9A60D1]">Crédits : {user?.Coins} 💎</p>
             </div>
           </div>
           {/* Pseudo-élément pour la lueur courbée */}
