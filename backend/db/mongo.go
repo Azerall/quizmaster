@@ -527,3 +527,50 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) ([]in
 	}
 	return result, err
 }
+
+func GetUserCategories(client *mongo.Client, username string) ([]model.Category, error) {
+	collection := client.Database("DB").Collection("categories")
+
+	// Filtrer par username
+	filter := bson.M{"username": username}
+
+	// Trouver les documents
+	cursor, err := collection.Find(context.TODO(), filter)
+	if err != nil {
+		log.Printf("Erreur lors de la recherche des catégories : %v", err)
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
+
+	// Convertir les résultats en slice
+	var categories []model.Category
+	if err = cursor.All(context.TODO(), &categories); err != nil {
+		log.Printf("Erreur lors du décodage des catégories : %v", err)
+		return nil, err
+	}
+
+	return categories, nil
+}
+
+func CategoryExists(client *mongo.Client, username string, categoryName string) (bool, error) {
+	collection := client.Database("DB").Collection("categories")
+	filter := bson.M{"username": username, "categoryname": categoryName}
+	count, err := collection.CountDocuments(context.TODO(), filter)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func CreateCategory(client *mongo.Client, username string, categoryName string, questions []model.Question) error {
+	collection := client.Database("DB").Collection("categories")
+
+	category := bson.M{
+		"username":     username,
+		"categoryname": categoryName,
+		"questions":    questions,
+	}
+
+	_, err := collection.InsertOne(context.TODO(), category)
+	return err
+}

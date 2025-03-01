@@ -97,6 +97,31 @@ func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func GetUserByNameHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	vars := mux.Vars(r)
+	username := vars["username"]
+	if username == "" {
+		http.Error(w, "Nom d'utilisateur manquant", http.StatusBadRequest)
+		return
+	}
+	client := db.Connect()
+	defer client.Disconnect(context.TODO())
+
+	user, err := db.GetUserByName(client, username)
+	if err != nil {
+		http.Error(w, "Utilisateur non trouvé", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
+
 // retourne un utilisateur par son token
 func GetUserTokenHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Réception d'une requête GET getUsertOken")
@@ -291,4 +316,89 @@ func UpdateUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Mot de passe mis à jour avec succès"})
+}
+
+func GetUserCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Réception d'une requête GET sur /getUserCategories")
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extraire l'username des paramètres de requête
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		http.Error(w, "Nom d'utilisateur manquant", http.StatusBadRequest)
+		return
+	}
+
+	client := db.Connect()
+	defer client.Disconnect(context.TODO())
+
+	// Récupérer les catégories de l'utilisateur
+	categories, err := db.GetUserCategories(client, username)
+	if err != nil {
+		log.Printf("Erreur lors de la récupération des catégories : %v", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(categories)
+}
+
+func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusMethodNotAllowed, Message: "Méthode non autorisée"})
+		return
+	}
+
+	var categoryData struct {
+		Username     string           `json:"username"`
+		CategoryName string           `json:"categoryName"`
+		Questions    []model.Question `json:"questions"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&categoryData); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Données invalides"})
+		return
+	}
+	log.Printf("Données reçues - Catégorie: %s, Utilisateur: %s", categoryData.CategoryName, categoryData.Username)
+
+	if categoryData.Username == "" || categoryData.CategoryName == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Le nom de la catégorie et l'utilisateur sont requis"})
+		return
+	}
+
+	client := db.Connect()
+	defer client.Disconnect(context.Background())
+
+	// Vérifier si la catégorie existe déjà pour cet utilisateur
+	exists, err := db.CategoryExists(client, categoryData.Username, categoryData.CategoryName)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification de la catégorie"})
+		return
+	}
+	if exists {
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusConflict, Message: "La catégorie existe déjà"})
+		return
+	}
+
+	// Créer la catégorie
+	err = db.CreateCategory(client, categoryData.Username, categoryData.CategoryName, categoryData.Questions)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la création de la catégorie"})
+		return
+	}
+
+	log.Printf("Catégorie créée avec succès: %s pour %s", categoryData.CategoryName, categoryData.Username)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Catégorie créée avec succès"})
 }

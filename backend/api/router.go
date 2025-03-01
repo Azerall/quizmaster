@@ -31,6 +31,9 @@ func ConfigureRoutes() *mux.Router {
 	r.HandleFunc("/api/user/changePseudo/{userid}", handlers.UpdateUserPseudoHandler).Methods("PUT")
 	r.HandleFunc("/api/user/changePassword/{userid}", handlers.UpdateUserPasswordHandler).Methods("PUT")
 	r.HandleFunc("/api/user/deleteUser/{userid}", handlers.DeleteUserHandler).Methods("DELETE")
+	r.HandleFunc("/api/user/getUserCategories", handlers.GetUserCategoriesHandler).Methods("GET")
+	r.HandleFunc("/api/user/createCategory", handlers.CreateCategoryHandler).Methods("POST")
+	r.HandleFunc("/api/user/getUser/{username}", handlers.GetUserByNameHandler).Methods("GET")
 
 	// Handlers pour les endpoints de l'API quiz
 	r.HandleFunc("/api/quiz/getQuizByExternalAPI/{category}", handlers.GenerateQuizHandler).Methods("GET")

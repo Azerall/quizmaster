@@ -26,7 +26,7 @@ const Navbar = () => {
       {/* Liens de navigation */}
       <div className="flex items-center space-x-6">
         <NavLink to="/" active={isActive("/")}>Accueil</NavLink>
-        <NavLink to="/quiz" active={isActive("/quiz")}>Quizzes</NavLink>
+        <NavLink to="/quizzes" active={isActive("/quizzes")}>Quizzes</NavLink>
         <NavLink to="/profil" active={isActive("/profil")}>Profil</NavLink>
         <NavLink to="/gacha" active={isActive("/gacha")}>Gacha</NavLink>
 
