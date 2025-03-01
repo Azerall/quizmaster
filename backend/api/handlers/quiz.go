@@ -182,6 +182,13 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	client := db.Connect()
 	defer client.Disconnect(context.Background())
 
+	boolexist, onGoingQuiz := db.OnGoingQuiz(client, QuizData.Username)
+	if boolexist {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz récupéré avec succès", Data: onGoingQuiz})
+		return
+	}
+
 	allquestions := db.GetQuestionsByCategory(client, QuizData.Username, QuizData.CategoryName)
 	if len(allquestions) < 10 {
 		log.Printf("Nombre de questions insuffisant: %d", len(allquestions))
@@ -200,7 +207,7 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 		Number_question: 0,
 	}
 
-	err := db.CreateQuiz(client, quiz)
+	quiz, err := db.CreateQuiz(client, quiz)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la création du quiz"})
@@ -210,5 +217,5 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	// Quiz créé avec succès
 	log.Printf("Quiz créé avec succès: %v", quiz)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz créé avec succès"})
+	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz créé avec succès", Data: quiz})
 }

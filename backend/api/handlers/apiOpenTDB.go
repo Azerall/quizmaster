@@ -150,8 +150,7 @@ func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
 
-	// boolexist, onGoingQuiz := db.OnGoindQuiz(client, "67b9d9d77163bb4b523cbf71")
-	boolexist, onGoingQuiz := db.OnGoindQuiz(client, request.Username)
+	boolexist, onGoingQuiz := db.OnGoingQuiz(client, request.Username)
 	if boolexist {
 		w.WriteHeader(http.StatusOK)
 		log.Println("Quiz récupéré avec succès")
@@ -161,7 +160,7 @@ func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 
 	quiz := GenerateQuiz(request.Username, request.Category)
 
-	err := db.CreateQuiz(client, quiz)
+	quiz, err := db.CreateQuiz(client, quiz)
 	if err != nil {
 		http.Error(w, "Erreur lors de l'insertion du quiz", http.StatusInternalServerError)
 		return

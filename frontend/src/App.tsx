@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import { JSX } from "react";
 import GachaPage from "./pages/GachaPage";
 import ProfilPage from "./pages/ProfilPage";
+import QuizGame from "./pages/QuizGame";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
@@ -32,6 +33,7 @@ function App() {
           />
           <Route path="/profil" element={<ProfilPage />} />
           <Route path="/gacha" element={<GachaPage />} />
+          <Route path="/quiz" element={<QuizGame />} />
           <Route path="/signin" element={<AuthForm isSignup={false} />} />
           <Route path="/signup" element={<AuthForm isSignup={true} />} />
         </Routes>
