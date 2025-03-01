@@ -292,7 +292,7 @@ func GetUserByUsername(client *mongo.Client, username string) (model.User, error
 }
 
 // Quiz non terminé par un utilisateur
-func OnGoindQuiz(client *mongo.Client, userName string) (bool, model.Quiz) {
+func OnGoingQuiz(client *mongo.Client, userName string) (bool, model.Quiz) {
 	filter := bson.M{"username": userName, "finish": false}
 
 	var quiz model.Quiz
@@ -308,11 +308,11 @@ func OnGoindQuiz(client *mongo.Client, userName string) (bool, model.Quiz) {
 }
 
 // Create a Quiz
-func CreateQuiz(client *mongo.Client, quiz model.Quiz) error {
+func CreateQuiz(client *mongo.Client, quiz model.Quiz) (model.Quiz, error) {
 	coll := client.Database("DB").Collection("Quiz")
 	log.Println("Création d'un quiz par l'API externe")
 	_, err := coll.InsertOne(context.TODO(), quiz)
-	return err
+	return quiz, err
 }
 
 func GetQuizByID(client *mongo.Client, quizID string) (model.Quiz, error) {
