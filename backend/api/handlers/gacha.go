@@ -36,7 +36,8 @@ func PullHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := db.GetCheatSheet(client, requestData.Username, requestData.Quantity)
 	if err != nil {
-		http.Error(w, "Erreur lors de la génération d'un anti-seche", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: err.Error(), Data: nil})
 		return
 	}
 
