@@ -132,25 +132,24 @@ func GenerateQuiz(userName string, category string) model.Quiz {
 
 func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Réception d'une requête GET sur /getQuizByExternalAPI")
+
 	if r.Method != http.MethodGet {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var request struct {
-		Username string `json:"username"`
-		Category string `json:"category"`
-	}
+	username := r.URL.Query().Get("username")
+	category := r.URL.Query().Get("categoryname")
 
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Données invalides", http.StatusBadRequest)
+	if username == "" || category == "" {
+		http.Error(w, "Paramètres manquants", http.StatusBadRequest)
 		return
 	}
 
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
 
-	boolexist, onGoingQuiz := db.OnGoingQuiz(client, request.Username)
+	boolexist, onGoingQuiz := db.OnGoingQuiz(client, username)
 	if boolexist {
 		w.WriteHeader(http.StatusOK)
 		log.Println("Quiz récupéré avec succès")
@@ -158,7 +157,7 @@ func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quiz := GenerateQuiz(request.Username, request.Category)
+	quiz := GenerateQuiz(username, category)
 
 	quiz, err := db.CreateQuiz(client, quiz)
 	if err != nil {
