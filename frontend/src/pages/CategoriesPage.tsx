@@ -55,7 +55,9 @@ const CategoriesPage = () => {
   }, [token, user]);
 
   const handleCategoryClick = (category: string) => {
-    navigate(`/quiz/${category}`);
+    navigate(`/quiz/${category}`, {
+      state: { selectedCategory: category, allCategories: categories },
+    });
   };
 
   return (
