@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 
 const QuizGame = () => {
   const { user, updateUser } = useAuth();
   const { category } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const { selectedCategory, allCategories } = location.state || {};
   const [method, setMethod] = useState("");
   const [quizType, setQuizType] = useState("");
@@ -20,7 +21,8 @@ const QuizGame = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [choices, setChoices] = useState<string[]>([]);  // Choix des réponses
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);  // Typé à string ou null
-  const [loading, setLoading] = useState(true);  // Le chargement est vrai au début
+  const [loading, setLoading] = useState(true);  
+  const [usedCheatSheets, setUsedCheatSheets] = useState<number[]>([]);
 
   useEffect(() => {
     if (selectedCategory && allCategories) {
@@ -31,6 +33,12 @@ const QuizGame = () => {
         setQuizType("createQuiz");
         setMethod("POST");
       }
+    }
+    else {
+      setQuizType("getQuizByExternalAPI");
+      console.log("category====", selectedCategory);
+      setMethod("GET");
+      handleQuiz();
     }
   }, [selectedCategory, allCategories]);
 
@@ -96,10 +104,21 @@ const QuizGame = () => {
         setQuestionNumber(questionNumber + 1);
         setChoices(questions[questionNumber].responses); 
         setSelectedChoice(null);
+        setUsedCheatSheets([]);
       }
+
+      // Vérifie si c'était la dernière question pour rediriger l'utilisateur
+      if (questionNumber >= questions.length - 1) {
+        navigate("/dashboard");
+      }
+      
     } else {
       alert(data.message);
     }
+};
+
+  const handleUseCheatsheet = (index: number) => {
+    setUsedCheatSheets([...usedCheatSheets, index]);
   };
 
   
@@ -148,6 +167,31 @@ const QuizGame = () => {
           </>
         )}
       </div>
+
+      {/* Cheatsheet à droite */}
+      <ul className="mt-6 space-y-4 ml-10">
+        {user?.Inventory?.map((cheatsheet, index) => (
+          <li key={index} className="flex items-center p-4 bg-gray-100 rounded shadow-md">
+            <div className="mr-4">
+              {/* <span className="text-2xl">📜</span> */}
+              <img src={`/images/cheatsheets/rarity${cheatsheet.rarity}.png`} alt="Cheatsheet" className="w-16 h-16" />
+            </div>
+            <div>
+              <p><strong>x</strong>{cheatsheet.quantity}</p>
+              <button
+                className={`mt-2 py-1 px-3 text-sm font-semibold rounded shadow-md transition-all duration-200 ${
+                  usedCheatSheets.includes(index) ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+                onClick={() => handleUseCheatsheet(index)}
+                disabled={usedCheatSheets.includes(index)}
+              >
+                Utiliser
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+
     </div>
   );
 };
