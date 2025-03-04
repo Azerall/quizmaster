@@ -9,6 +9,8 @@ import (
 	"quizmaster/model"
 
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -350,6 +352,36 @@ func GetUserCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(categories)
+}
+
+type UserRanking struct {
+	Username string `bson:"username"`
+	Level    int    `bson:"level"`
+}
+
+func GetTopPlayers(w http.ResponseWriter, r *http.Request) {
+	log.Println("Réception d'une requête GET sur /getTopPlayers")
+
+	client := db.Connect()
+	defer client.Disconnect(context.TODO())
+
+	// Sélection de la collection
+	collection := client.Database("DB").Collection("users")
+
+	cursor, err := collection.Find(context.TODO(), bson.M{}, options.Find().SetSort(bson.D{{"level", -1}}).SetLimit(5))
+	if err != nil {
+		http.Error(w, "Erreur lors de la récupération des utilisateurs", http.StatusInternalServerError)
+		return
+	}
+	defer cursor.Close(context.TODO())
+
+	var users []UserRanking
+	if err = cursor.All(context.TODO(), &users); err != nil {
+		http.Error(w, "Erreur lors du décodage des utilisateurs", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(users)
 }
 
 func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {

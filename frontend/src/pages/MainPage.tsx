@@ -1,8 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const MainPage = () => {
   const { user } = useAuth();
+  const [topPlayers, setTopPlayers] = useState<{ Username: string; Level: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  //fontion pour charger les classements du serveur
+  async function fetchTopPlayers () {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/user/getTopPlayers", {
+        method: 'GET',
+        headers: {
+          'Content-Type' : 'application/json'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Impossible de récupérer les meilleurs joueurs.');
+      }
+      const data = await response.json();
+      setTopPlayers(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des meilleurs joueurs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopPlayers();
+  }, []);
   
   if (true) {
     console.log(user);
@@ -70,6 +98,28 @@ const MainPage = () => {
           >
             🎮 JOUER
           </button>
+        </div>
+        {/* Classement des meilleurs joueurs */}
+        <div className="mt-10 w-full max-w-4xl bg-[#1E1A33] rounded-lg p-8 text-white shadow-md">
+          <h2 className="text-2xl font-bold text-center mb-4 text-[#E470A3]">🏆 Top 5 Joueurs</h2>
+          {isLoading ? (
+            <p className="text-center text-gray-400">Chargement...</p>
+          ) : (
+            <ul className="space-y-4">
+              {topPlayers.map((player, index) => (
+                <li
+                  key={index}
+                  className="flex justify-between items-center px-6 py-3 bg-[#292047] rounded-lg shadow-lg"
+                  style={{
+                    boxShadow: "0 0 12px rgba(255, 215, 0, 0.6)",
+                  }}
+                >
+                  <span className="font-semibold text-lg">#{index + 1} {player.Username}</span>
+                  <span className="text-[#FFD700]">⭐ Niveau {player.Level}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

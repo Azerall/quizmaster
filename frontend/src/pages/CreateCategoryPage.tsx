@@ -72,7 +72,7 @@ return (
   <div className="h-screen flex flex-col items-center bg-transparent pt-10">
     <div className="w-full max-w-2xl bg-[#292047] shadow-lg rounded-lg p-6 relative border border-[#9A60D1]">
       <h1 className="text-[#E470A3] text-4xl font-bold text-center mb-6">Créer une Catégorie</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 h-[80vh] overflow-y-auto p-4 border border-[#9A60D1] rounded-lg">
         <label className="text-white text-lg">Nom de la Catégorie :</label>
         <input
           type="text"
@@ -127,6 +127,13 @@ return (
           className="mt-4 bg-[#E470A3] text-white px-6 py-3 rounded-lg w-full hover:bg-[#D65F8F] transition"
         >
           Créer la Catégorie
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/quizzes")}
+          className="mt-4 bg-[#E470A3] text-white px-6 py-3 rounded-lg w-full hover:bg-[#D65F8F] transition"
+        >
+          Cancel
         </button>
       </form>
     </div>

@@ -34,6 +34,7 @@ func ConfigureRoutes() *mux.Router {
 	r.HandleFunc("/api/user/getUserCategories", handlers.GetUserCategoriesHandler).Methods("GET")
 	r.HandleFunc("/api/user/createCategory", handlers.CreateCategoryHandler).Methods("POST")
 	r.HandleFunc("/api/user/getUser/{username}", handlers.GetUserByNameHandler).Methods("GET")
+	r.HandleFunc("/api/user/getTopPlayers", handlers.GetTopPlayers).Methods("GET")
 
 	// Handlers pour les endpoints de l'API quiz
 	r.HandleFunc("/api/quiz/getQuizByExternalAPI/{category}", handlers.GenerateQuizHandler).Methods("GET")
