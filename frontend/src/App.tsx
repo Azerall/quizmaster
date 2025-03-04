@@ -24,7 +24,7 @@ function App() {
       {!hideNavbar && <Navbar />}
       <div className="flex-grow overflow-hidden">
         <Routes>
-          <Route path="/" element={<MainPage />} />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route
             path="/dashboard"
             element={
