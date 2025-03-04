@@ -493,19 +493,12 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) ([]in
 			rarity = 3
 		}
 
-		// Trouver l'élément dans l'inventaire ou l'ajouter s'il n'existe pas
-		found := false
 		for j := range user.Inventory {
 			if user.Inventory[j].Rarity == rarity {
 				user.Inventory[j].Quantity++
 				result = append(result, rarity)
-				found = true
 				break
 			}
-		}
-		if !found {
-			user.Inventory = append(user.Inventory, model.CheatSheet{Rarity: rarity, Quantity: 1})
-			result = append(result, rarity)
 		}
 	}
 

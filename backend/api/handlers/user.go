@@ -58,7 +58,11 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Initialisation des valeurs par défaut
 	newUser.Level = 1
 	newUser.Coins = 0
-	newUser.Inventory = []model.CheatSheet{}
+	newUser.Inventory = []model.CheatSheet{
+		{Rarity: 3, Quantity: 0},
+		{Rarity: 4, Quantity: 0},
+		{Rarity: 5, Quantity: 0},
+	}
 	newUser.Stats = model.Stats{PlayedQuizzes: 0, WinQuizzes: 0}
 
 	// Insertion en base
