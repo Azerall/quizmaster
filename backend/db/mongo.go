@@ -574,3 +574,65 @@ func CreateCategory(client *mongo.Client, username string, categoryName string, 
 	_, err := collection.InsertOne(context.TODO(), category)
 	return err
 }
+
+func UseCheatSheet(client *mongo.Client, quizID string, rarity int) ([]string, error) {
+	coll := client.Database("DB").Collection("Quiz")
+
+	// Récupérer le quiz
+	objID, err := primitive.ObjectIDFromHex(quizID)
+	if err != nil {
+		log.Printf("❌ Erreur lors de la conversion de l'ID du quiz en ObjectID : %v\n", err)
+		return nil, err
+	}
+
+	var quiz model.Quiz
+	err = coll.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&quiz)
+	if err != nil {
+		log.Printf("❌ Erreur lors de la récupération du quiz : %v\n", err)
+		return nil, err
+	}
+
+	var hints int = 0
+	if rarity == 5 {
+		hints = 3
+	}
+	if rarity == 4 {
+		hints = 2
+	}
+	if rarity == 3 {
+		hints = 1
+	}
+
+	var allHints []string
+	currentQuestion := quiz.Questions[quiz.Number_question]
+	for _, response := range currentQuestion.Responses {
+		if response != currentQuestion.ResponseCorrect {
+			allHints = append(allHints, response)
+		}
+	}
+
+	// Mélanger les réponses
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(allHints), func(i, j int) { allHints[i], allHints[j] = allHints[j], allHints[i] })
+
+	// Sélectionner le nombre d'indices requis
+	var result []string
+	for i := 0; i < hints && i < len(allHints); i++ {
+		result = append(result, allHints[i])
+	}
+
+	//Mettre a jour les cheatsheets de l'user
+	userColl := client.Database("DB").Collection("users")
+	// filter := bson.M{"username": quiz.Username}
+	// update := bson.M{"$pull": bson.M{"inventory": bson.M{"rarity": rarity, "quantity": 1}}}
+	// _, err = userColl.UpdateOne(context.TODO(), filter, update)
+	filter := bson.M{"username": quiz.Username, "inventory.rarity": rarity}
+	update := bson.M{"$inc": bson.M{"inventory.$.quantity": -1}}
+	_, err = userColl.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		log.Printf("❌ Erreur lors de la mise à jour de l'inventaire de l'utilisateur : %v\n", err)
+		return nil, err
+	}
+
+	return result, nil
+}

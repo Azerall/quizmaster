@@ -22,7 +22,9 @@ const QuizGame = () => {
   const [choices, setChoices] = useState<string[]>([]);  // Choix des réponses
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);  // Typé à string ou null
   const [loading, setLoading] = useState(true);  
-  const [usedCheatSheets, setUsedCheatSheets] = useState<number[]>([]);
+  const [hasUsedCheatsheet, setHasUsedCheatsheet] = useState<boolean>(false);
+  const [cheatsheet, setCheatsheet] = useState<string[]>([]);
+
 
   useEffect(() => {
     if (selectedCategory && allCategories) {
@@ -104,7 +106,8 @@ const QuizGame = () => {
         setQuestionNumber(questionNumber + 1);
         setChoices(questions[questionNumber].responses); 
         setSelectedChoice(null);
-        setUsedCheatSheets([]);
+        setHasUsedCheatsheet(false);  // Réinitialise l'utilisation de cheat sheet
+        setCheatsheet([]);  // Réinitialise le cheat sheet
       }
 
       // Vérifie si c'était la dernière question pour rediriger l'utilisateur
@@ -117,8 +120,49 @@ const QuizGame = () => {
     }
 };
 
+
   const handleUseCheatsheet = (index: number) => {
-    setUsedCheatSheets([...usedCheatSheets, index]);
+    if (!hasUsedCheatsheet && user) {  // Vérifie que l'utilisateur existe
+      const updatedInventory = [...user!.Inventory];
+      if (updatedInventory[index].quantity > 0) {
+        updatedInventory[index].quantity -= 1;
+        
+        // Met à jour l'utilisateur avec l'inventaire modifié
+        updateUser({ ...user, Inventory: updatedInventory });
+  
+        setHasUsedCheatsheet(true);
+        handleCheatSheet(index);
+      }
+    }
+  };
+  
+  
+
+  const handleCheatSheet = async (rarity: number) => {
+    const API_URL = "http://localhost:8080";
+    const endpoint = `${API_URL}/api/cheatsheet`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quizID: quizID,
+          rarity: rarity + 3,  // Ajout de 3 à la valeur de rarity
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}: ${data.message}`);
+      }
+      console.log("Indices reçus:", data);
+      setCheatsheet(data.data);
+
+    } catch (error) {
+      console.error("=== Erreur lors de la requête:", error);
+    }
   };
 
   
@@ -143,17 +187,23 @@ const QuizGame = () => {
               {questions[questionNumber]?.question_text}  {/* Vérifie si la question existe avant de l'afficher */}
             </p>
             <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-              {choices.map((choice, index) => (
-                <button
-                  key={index}
-                  className={`py-3 px-6 text-lg font-semibold rounded shadow-md transition-all duration-200 ${
-                    selectedChoice === choice ? "bg-blue-500 text-white" : "bg-white hover:bg-gray-200"
-                  }`}
-                  onClick={() => handleChoiceClick(choice)}
-                >
-                  {choice}
-                </button>
-              ))}
+              {choices.map((choice, index) => {
+                const isDisabled = cheatsheet.includes(choice); // Vérifie si la réponse est dans le cheatsheet
+                return (
+                  <button
+                    key={index}
+                    className={`py-3 px-6 text-lg font-semibold rounded shadow-md transition-all duration-200 ${
+                      isDisabled ? "bg-gray-300 text-gray-600 cursor-not-allowed" : 
+                      selectedChoice === choice ? "bg-blue-500 text-white" : "bg-white hover:bg-gray-200"
+                    }`}
+                    onClick={() => !isDisabled && handleChoiceClick(choice)}
+                    disabled={isDisabled}
+                  >
+                    {choice}
+                  </button>
+                );
+              })}
+
             </div>
             <button
               className={`mt-6 py-3 px-6 text-lg font-semibold rounded shadow-md transition-all duration-200 ${
@@ -173,17 +223,16 @@ const QuizGame = () => {
         {user?.Inventory?.map((cheatsheet, index) => (
           <li key={index} className="flex items-center p-4 bg-gray-100 rounded shadow-md">
             <div className="mr-4">
-              {/* <span className="text-2xl">📜</span> */}
               <img src={`/images/cheatsheets/rarity${cheatsheet.rarity}.png`} alt="Cheatsheet" className="w-16 h-16" />
             </div>
             <div>
               <p><strong>x</strong>{cheatsheet.quantity}</p>
               <button
                 className={`mt-2 py-1 px-3 text-sm font-semibold rounded shadow-md transition-all duration-200 ${
-                  usedCheatSheets.includes(index) ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"
-                }`}
+                  hasUsedCheatsheet ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}                
                 onClick={() => handleUseCheatsheet(index)}
-                disabled={usedCheatSheets.includes(index)}
+                disabled={hasUsedCheatsheet || cheatsheet.quantity < 1}
               >
                 Utiliser
               </button>

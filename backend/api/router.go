@@ -44,6 +44,9 @@ func ConfigureRoutes() *mux.Router {
 	// Handlers pour les endpoints de l'API gacha
 	r.HandleFunc("/api/gacha/pull", handlers.PullHandler).Methods("POST")
 
+	// Handlers pour cheatSheet
+	r.HandleFunc("/api/cheatsheet", handlers.UseCheatSheetHandler).Methods("POST")
+
 	buildDir := "../client/build"
 	fileServer := http.FileServer(http.Dir(buildDir))
 
