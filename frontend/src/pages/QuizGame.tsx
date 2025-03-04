@@ -229,7 +229,7 @@ const QuizGame = () => {
               <p><strong>x</strong>{cheatsheet.quantity}</p>
               <button
                 className={`mt-2 py-1 px-3 text-sm font-semibold rounded shadow-md transition-all duration-200 ${
-                  hasUsedCheatsheet ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"
+                  (hasUsedCheatsheet || cheatsheet.quantity < 1) ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}                
                 onClick={() => handleUseCheatsheet(index)}
                 disabled={hasUsedCheatsheet || cheatsheet.quantity < 1}
