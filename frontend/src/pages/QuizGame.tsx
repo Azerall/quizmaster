@@ -100,7 +100,8 @@ const QuizGame = () => {
     if (response.ok) {
       if (data) {
         setIsAnswerChecked(true);
-        console.log("vrai reponse correcte", correctAnswer);
+        setCorrectAnswer(data.data);
+        console.log("vrai reponse correcte", data.data);
       }
 
     } else {

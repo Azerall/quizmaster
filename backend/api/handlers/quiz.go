@@ -40,6 +40,8 @@ func VerifyAnswer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var response string = quiz.Questions[quiz.Number_question].ResponseCorrect
+
 	if quiz.Questions[quiz.Number_question].ResponseCorrect == requestData.Answer {
 		quiz.Mark += 1
 	}
@@ -65,7 +67,7 @@ func VerifyAnswer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: responseMessage})
+	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: responseMessage, Data: response})
 }
 
 func AddStats(userName string, quizID string) {
