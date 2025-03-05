@@ -7,6 +7,7 @@ type User struct {
 	Token     string       `bson:"token"`
 	Level     int          `bson:"level"`
 	Coins     int          `bson:"coins"`
+	Picture   string       `bson:"picture"`
 	Inventory []CheatSheet `bson:"inventory"`
 	Stats     Stats        `bson:"stats"`
 }
@@ -28,7 +29,7 @@ type Category struct {
 }
 
 type Quiz struct {
-	ID              string     `bson:"_id,omitempty"`
+	ID              string     `json:"ID" bson:"_id,omitempty"`
 	Username        string     `bson:"username"`
 	Questions       []Question `bson:"questions"`
 	Mark            int        `bson:"mark"`

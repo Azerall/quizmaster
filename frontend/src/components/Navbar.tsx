@@ -1,7 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png"; // Assurez-vous que le chemin est correct
-import logoutIcon from "../assets/logout.png"; // Ajoutez une image de porte de sortie
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -12,14 +10,18 @@ const Navbar = () => {
     navigate("/signin");
   };
 
+  const handleLogoClick = () => {
+    navigate("/dashboard");
+  };
+
   // Fonction pour vérifier si le lien est actif
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-[#292047] p-4 flex justify-between items-center">
+    <nav className="fixed top-0 left-0 w-screen bg-[#292047] p-4 flex justify-between items-center z-50 ">
       {/* Logo et Titre */}
-      <div className="flex items-center space-x-3">
-        <img src={logo} alt="Logo" className="h-10 w-10" />
+      <div className="flex items-center space-x-3 cursor-pointer" onClick={handleLogoClick}>
+        <img src="src/assets/logo.png" alt="Logo" className="h-10 w-10" />
         <span className="text-[#E370A2] text-2xl font-bold chevadisplay-font">QUIZ MASTER ++</span>
       </div>
 
@@ -32,7 +34,7 @@ const Navbar = () => {
 
         {/* Bouton Déconnexion avec Icône */}
         <button onClick={handleLogout} className="ml-4">
-          <img src={logoutIcon} alt="Déconnexion" className="h-8 w-8 hover:opacity-80 transition-opacity" />
+          <img src="src/assets/logout.png" alt="Déconnexion" className="h-8 w-8 hover:opacity-80 transition-opacity cursor-pointer" />
         </button>
       </div>
     </nav>

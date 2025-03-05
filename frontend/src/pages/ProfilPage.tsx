@@ -1,56 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const ProfilPage = () => {
-  const [profil, setProfil] = useState({
-    username: "JoueurX",
-    niveau: 38,
-    credit: 1200,
-    photo: "/images/profils/kafka.png",
-  });
+  const { user, updateUser, fetchFromBackend } = useAuth();
 
-  const [editUsername, setEditUsername] = useState(false); // Mode édition pour le username
-  const [editPhoto, setEditPhoto] = useState(false); // Mode édition pour la photo
-  const [newUsername, setNewUsername] = useState(profil.username);
-  const [newPhoto, setNewPhoto] = useState(profil.photo); // Gestion des photos prédéfinies
+  const [editUsername, setEditUsername] = useState(false);
+  const [editPicture, setEditPicture] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [profileImages, setProfileImages] = useState<string[]>([]);
 
-  // Liste des photos disponibles dans /images/profils/
-  const profileImages = [
-    "/images/profils/kafka.png",
-    "/images/profils/blade.png",
-    "/images/profils/silver_wolf.png",
-  ];
+  useEffect(() => {
+    // Importer toutes les images de profils
+    const images = import.meta.glob('/src/assets/profils/*.{png,jpg,jpeg,gif}', { eager: true });
+    const imageUrls = Object.values(images).map((mod: any) => mod.default);
+    setProfileImages(imageUrls);
+  }, []);
 
-  // Données statiques (vous pouvez les connecter à une API ou une base de données)
-  const [inventory] = useState<{ rarity: string; image: string; quantity: number }[]>([
-    { rarity: "Rare", image: "/images/cheatsheets/rarity3.png", quantity: 3 },
-    { rarity: "Épique", image: "/images/cheatsheets/rarity4.png", quantity: 2 },
-    { rarity: "Légendaire", image: "/images/cheatsheets/rarity5.png", quantity: 1 },
-  ]);
-  const [stats] = useState({
-    playedQuizzes: 150,
-    winQuizzes: 95,
-  });
+  useEffect(() => {
+    setNewUsername(user?.Username || "");
+  }, [user]);
 
-  // Fonction pour sauvegarder les modifications du username
-  const handleSaveUsername = () => {
-    setProfil({
-      ...profil,
-      username: newUsername,
-    });
+  const handleSaveUsername = async () => {
+    if (updateUser && newUsername && user?.ID) {
+      try {
+        const response = await fetchFromBackend(`/api/user/changeUsername/${user.ID}`, "PUT", JSON.stringify({
+          newUsername: newUsername,
+        }));
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+        }
+        updateUser({
+          ...user,
+          Username: newUsername,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
     setEditUsername(false);
   };
 
-  // Fonction pour sauvegarder les modifications de la photo
-  const handleSavePhoto = () => {
-    setProfil({
-      ...profil,
-      photo: newPhoto,
-    });
-    setEditPhoto(false);
+  const handleSavePicture = async (newPicture: string) => {
+    if (updateUser && user?.ID) {
+      try {
+        const response = await fetchFromBackend(`/api/user/changePicture/${user.ID}`, "PUT", JSON.stringify({
+          newPicture: newPicture,
+        }));
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          updateUser({
+            ...user,
+            Picture: newPicture,
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    setEditPicture(false);
   };
 
   return (
-    <div className="h-screen flex flex-col bg-transparent">
+    <div className="h-screen pt-[100px] flex flex-col bg-transparent">
       {/* Contenu principal */}
       <div className="flex flex-col items-center pt-8 pb-8 flex-grow">
         <div className="relative w-full max-w-2xl">
@@ -62,35 +76,54 @@ const ProfilPage = () => {
             {/* Image de profil centrée cliquable */}
             <div className="absolute top-7 left-1/2 transform -translate-x-1/2">
               <div
-                className="w-35 h-35 bg-[#E470A3] rounded-full flex items-center justify-center border-4 border-white cursor-pointer"
-                onClick={() => setEditPhoto(!editPhoto)} // Ouvre l'édition pour la photo
+                className="w-35 h-35 rounded-full flex items-center justify-center border-4 border-white cursor-pointer"
+                onClick={() => setEditPicture(!editPicture)} // Ouvre l'édition pour la photo
                 style={{
                   boxShadow: "0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.8)",
                 }}
               >
                 <img
-                  src={newPhoto}
+                  src={user?.Picture}
                   alt="Profil"
                   className="w-full h-full rounded-full object-cover"
                 />
               </div>
             </div>
-
-            {/* Options d'images à droite de l'image de profil (visible en mode édition de photo) */}
-            {editPhoto && (
-              <div className="absolute top-16 right-6 flex gap-2">
-                {profileImages.map((image) => (
+            {editPicture && (
+              <div className="absolute top-14 right-4 w-[calc(35%)] h-21 overflow-x-auto flex gap-3 p-2 pl-3 pr-3 bg-[#292047] rounded-lg shadow-lg border border-[#9A60D1]"
+                style={{
+                  boxShadow: "0 0 15px rgba(64, 196, 255, 0.7), 0 0 30px rgba(64, 196, 255, 0.5)",
+                }}
+              >
+                {/* Image actuelle de l'utilisateur en premier avec lueur néon blanche */}
+                {user?.Picture && (
                   <img
-                    key={image}
-                    src={image}
-                    alt={`Option ${image.split('/').pop()?.split('.').shift() || "Photo"}`}
-                    className="w-18 h-18 rounded-full object-cover border-2 border-transparent cursor-pointer hover:border-[#E470A3]"
+                    key={user.Picture}
+                    src={user.Picture}
+                    alt={`Option courante ${user.Picture.split('/').pop()?.split('.').shift() || "Photo"}`}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-white cursor-pointer"
+                    style={{
+                      boxShadow: "0 0 15px rgba(0, 255, 255, 0.8), 0 0 10px rgba(0, 255, 255, 0.8)",
+                    }}
                     onClick={() => {
-                      setNewPhoto(image);
-                      handleSavePhoto(); // Sauvegarde immédiate et ferme l'édition
+                      setEditPicture(!editPicture);
                     }}
                   />
-                ))}
+                )}
+                {/* Autres images, filtrées pour exclure l'image actuelle */}
+                {profileImages
+                  .filter(image => image !== user?.Picture)
+                  .map((image) => (
+                    <img
+                      key={image}
+                      src={image}
+                      alt={`Option ${image.split('/').pop()?.split('.').shift() || "Photo"}`}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-transparent cursor-pointer hover:border-white"
+                      onClick={() => {
+                        handleSavePicture(image);
+                      }}
+                    />
+                  ))}
               </div>
             )}
           </div>
@@ -99,7 +132,7 @@ const ProfilPage = () => {
           <div
             className="shadow-lg rounded-b-lg p-6"
             style={{
-              background: "#292047", // Fond statique
+              background: "#292047",
             }}
           >
             {/* Section Profil */}
@@ -112,8 +145,7 @@ const ProfilPage = () => {
                         type="text"
                         value={newUsername}
                         onChange={(e) => setNewUsername(e.target.value)}
-                        placeholder="Nouveau nom d'utilisateur"
-                        className="text-3xl font-bold text-[#E470A3] bg-transparent border-b-2 border-[#4A2E7A] outline-none w-full max-w-md text-center p-0"
+                        className="text-3xl font-bold text-[#E470A3] bg-transparent border-b-2 border-[#E470A3] outline-none w-full max-w-md text-center p-0"
                       />
                       <button
                         onClick={handleSaveUsername}
@@ -124,7 +156,7 @@ const ProfilPage = () => {
                     </>
                   ) : (
                     <>
-                      <h2 className="text-3xl font-bold text-[#E470A3]">{profil.username}</h2>
+                      <h2 className="text-3xl font-bold text-[#E470A3]">{user?.Username}</h2>
                       <button
                         onClick={() => setEditUsername(true)}
                         className="bg-transparent text-white hover:text-[#E470A3] p-1 cursor-pointer"
@@ -135,8 +167,8 @@ const ProfilPage = () => {
                   )}
                 </div>
               </div>
-              <p className="text-[#9A60D1] text-lg">Niveau : {profil.niveau}</p>
-              <p className="text-[#9A60D1] text-lg">Crédits : {profil.credit} 💎</p>
+              <p className="text-[#9A60D1] text-lg">Niveau : {user?.Level}</p>
+              <p className="text-[#9A60D1] text-lg">Crédits : {user?.Coins} 💎</p>
             </div>
 
             {/* Sections supplémentaires avec barre verticale */}
@@ -145,12 +177,12 @@ const ProfilPage = () => {
               <div className="p-4 rounded-lg">
                 <h3 className="text-xl font-bold text-[#E470A3] mb-2">Inventaire</h3>
                 <div className="flex flex-col gap-4">
-                  {inventory.map((item, index) => (
+                  {user?.Inventory.map((item, index) => (
                     <div key={index} className="flex items-center gap-4">
                       <img
-                        src={item.image}
+                        src={`/images/cheatsheets/rarity${item.rarity}.png`}
                         alt={`Cheat ${index + 1}`}
-                        className="w-16 h-16 rounded-full object-cover"
+                        className="w-16 h-16 object-cover"
                       />
                       <span className="text-white text-sm">
                         {item.rarity} (x{item.quantity})
@@ -163,8 +195,8 @@ const ProfilPage = () => {
               {/* Stats */}
               <div className="p-4 rounded-lg ml-4"> {/* Ajout de ml-4 pour décaler vers la droite */}
                 <h3 className="text-xl font-bold text-[#E470A3] mb-2">Statistiques</h3>
-                <p className="text-white">Quizzes joués : {stats.playedQuizzes}</p>
-                <p className="text-white">Quizzes gagnés : {stats.winQuizzes}</p>
+                <p className="text-white">Quizzes joués : {user?.Stats.quizzes_played}</p>
+                <p className="text-white">Quizzes gagnés : {user?.Stats.quizzes_win}</p>
               </div>
 
               {/* Barre verticale blanche contenue dans les sections */}
@@ -172,7 +204,7 @@ const ProfilPage = () => {
                 style={{
                   height: "93%",
                   boxShadow: "0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.8)",
-                  backgroundColor: "rgba(255, 255, 255, 1)", // Assure une opacité complète
+                  backgroundColor: "rgba(255, 255, 255, 1)", 
                 }}
               />
             </div>
@@ -182,7 +214,7 @@ const ProfilPage = () => {
           <div className="absolute inset-0 rounded-lg pointer-events-none"
             style={{
               boxShadow: "0 0 15px rgba(64, 196, 255, 0.7), 0 0 30px rgba(64, 196, 255, 0.5)",
-              zIndex: -1, // Derrière le contenu
+              zIndex: -1,
             }}
           />
         </div>

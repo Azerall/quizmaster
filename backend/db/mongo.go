@@ -225,8 +225,8 @@ func DeleteUser(client *mongo.Client, userID string) error {
 	return nil
 }
 
-// UpdateUserPseudo met à jour le pseudo de l'utilisateur
-func UpdateUserPseudo(client *mongo.Client, userID string, newPseudo string) error {
+// UpdateUserUsername met à jour l'username de l'utilisateur
+func UpdateUserUsername(client *mongo.Client, userID string, newUsername string) error {
 	coll := client.Database("DB").Collection("users")
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
@@ -237,10 +237,10 @@ func UpdateUserPseudo(client *mongo.Client, userID string, newPseudo string) err
 	result, err := coll.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": objID},
-		bson.M{"$set": bson.M{"pseudo": newPseudo}},
+		bson.M{"$set": bson.M{"username": newUsername}},
 	)
 	if err != nil {
-		log.Printf("Erreur lors de la mise à jour du pseudo de l'utilisateur : %v\n", err)
+		log.Printf("Erreur lors de la mise à jour de l'username de l'utilisateur : %v\n", err)
 		return err
 	}
 
@@ -248,7 +248,7 @@ func UpdateUserPseudo(client *mongo.Client, userID string, newPseudo string) err
 		return errors.New("Aucune mise à jour effectuée")
 	}
 
-	log.Printf("Pseudo de l'utilisateur mis à jour avec succès. Documents affectés: %v\n", result.ModifiedCount)
+	log.Printf("Username de l'utilisateur mis à jour avec succès. Documents affectés: %v\n", result.ModifiedCount)
 	return nil
 }
 
@@ -518,6 +518,9 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) ([]in
 	if err != nil {
 		log.Printf("❌ Erreur mise à jour MongoDB: %v\n", err)
 	}
+
+	log.Printf(userName)
+	log.Printf("✅ Inventaire mis à jour: %v", user.Inventory)
 	return result, err
 }
 

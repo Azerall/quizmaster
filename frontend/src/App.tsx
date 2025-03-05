@@ -20,9 +20,9 @@ function App() {
   const hideNavbar = location.pathname === "/signin" || location.pathname === "/signup";
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {!hideNavbar && <Navbar />}
-      <div className="flex-grow overflow-hidden">
+      <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route
@@ -37,7 +37,7 @@ function App() {
           <Route path="/gacha" element={<GachaPage />} />
           <Route path="/quizzes" element={<CategoriesPage />} />
           <Route path="/create-category" element={<CreateCategoryPage />} />
-          <Route path="/quiz/:category" element={<QuizGame />} />
+          <Route path="/quiz" element={<QuizGame />} />
           <Route path="/signin" element={<AuthForm isSignup={false} />} />
           <Route path="/signup" element={<AuthForm isSignup={true} />} />
         </Routes>

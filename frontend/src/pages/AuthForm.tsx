@@ -30,33 +30,68 @@ export const AuthForm = ({ isSignup }: AuthFormProps) => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
+        <div className="auth-container" style={{
+                background: "transparent" }}>  
+<div
+        className="auth-card"
+        style={{
+          background: "#292047",
+          borderRadius: "8px",
+          padding: "20px",
+          boxShadow: "0px 4px 15px rgba(64, 196, 255, 0.6), 0px 0px 25px rgba(64, 196, 255, 0.4)",
+          maxWidth: "400px",
+          width: "100%",
+        }}
+      >
+                 
+                 <div className="flex items-center justify-center gap-4 mb-6 p-1">
+          <img
+            src="/src/assets/logo.png"
+            alt="Logo Quiz Master"
+            className="w-17 h-17 object-contain"
+          />
+          <span className="text-[#E470A3] text-3xl font-bold chevadisplay-font">
+            QUIZ MASTER ++
+          </span>
+        </div>
+
                 <div className="button-group">
-                <Link to="/signup" className={isSignup ? "active" : ""}>Sign up</Link>
-                <Link to="/signin" className={!isSignup ? "active" : ""}>Sign in</Link>
+                    <Link to="/signup" className={isSignup ? "active" : ""}>Sign up</Link>
+                    <Link to="/signin" className={!isSignup ? "active" : ""}>Sign in</Link>
                 </div>
 
-                <h2 className="auth-title">{isSignup ? "Sign up" : "Sign in"}</h2>
-
                 <form onSubmit={handleSubmit} className="auth-form">
-                    <label>Username</label>
-                    <input 
-                        type="text" 
-                        value={Username} 
+                    <label style={{ color: "white" }}>Username</label>
+                    <input
+                        className="w-full p-2 bg-[#292047] border-b-2 border-[#E470A3] text-white outline-none rounded-none focus:ring-2 focus:ring-[#E470A3]/50"
+                        type="text"
+                        value={Username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
 
-                    <label>Password</label>
-                    <input 
-                        type="password" 
-                        value={Password} 
+                    <label style={{ color: "white" }}>Password</label>
+                    <input
+                        className="w-full p-2 bg-[#292047] border-b-2 border-[#E470A3] text-white outline-none rounded-none focus:ring-2 focus:ring-[#E470A3]/50"
+                        type="password"
+                        value={Password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
 
-                    <button type="submit" className="auth-button">
+                    <button type="submit" 
+                    className="auth-button"
+                        style={{
+                            background: "linear-gradient(90deg, #E470A3, #9A60D1)",
+                            color: "white",
+                            borderRadius: "8px",
+                            fontSize: "1.125rem",
+                            fontWeight: "bold",
+                            border: "none",
+                            cursor: "pointer",
+                            boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6), 0px 0px 25px rgba(228, 112, 163, 0.4)",
+                            transition: "background-color 0.3s"
+                        }}>
                         {isSignup ? "Sign up" : "Sign in"}
                     </button>
                 </form>

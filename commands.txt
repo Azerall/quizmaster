@@ -2,6 +2,6 @@ docker-compose up --build
 docker-compose down
 
 npm run dev
-go run main.go
+nodemon --exec "go run main.go" --ext go
 
 modify .env dans la racine et dans backend

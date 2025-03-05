@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -53,7 +54,7 @@ func toStringSlice(input interface{}) ([]string, error) {
 		if !ok {
 			return nil, fmt.Errorf("élément non convertible en string")
 		}
-		result = append(result, str)
+		result = append(result, html.UnescapeString(str))
 	}
 
 	return result, nil
@@ -94,6 +95,12 @@ func GenerateQuiz(userName string, category string) model.Quiz {
 			continue
 		}
 
+		questionText, ok := questionMap["question"].(string)
+		if !ok {
+			log.Println("Erreur lors de la récupération du texte de la question")
+			continue
+		}
+
 		// Conversion des réponses incorrectes
 		incorrectAnswers, err := toStringSlice(questionMap["incorrect_answers"])
 		if err != nil {
@@ -108,7 +115,7 @@ func GenerateQuiz(userName string, category string) model.Quiz {
 			continue
 		}
 
-		allAnswers := append(incorrectAnswers, correctAnswer)
+		allAnswers := append(incorrectAnswers, html.UnescapeString(correctAnswer))
 		// Mélange des réponses
 		rand.Seed(time.Now().UnixNano())
 		rand.Shuffle(len(allAnswers), func(i, j int) {
@@ -116,9 +123,9 @@ func GenerateQuiz(userName string, category string) model.Quiz {
 		})
 
 		quiz.Questions = append(quiz.Questions, model.Question{
-			QuestionText:    questionMap["question"].(string),
+			QuestionText:    html.UnescapeString(questionText),
 			Responses:       allAnswers,
-			ResponseCorrect: correctAnswer,
+			ResponseCorrect: html.UnescapeString(correctAnswer),
 		})
 	}
 
@@ -151,6 +158,7 @@ func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 
 	boolexist, onGoingQuiz := db.OnGoingQuiz(client, username)
 	if boolexist {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 		log.Println("Quiz récupéré avec succès")
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz récupéré avec succès", Data: onGoingQuiz})
@@ -165,6 +173,7 @@ func GenerateQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Quiz généré avec succès", Data: quiz})
 }

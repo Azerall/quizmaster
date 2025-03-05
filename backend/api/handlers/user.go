@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"math/rand"
 	"net/http"
 	"quizmaster/db"
 	"quizmaster/model"
+	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,8 +16,28 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// création d'un nouvel utilisateur
-var jwtKey = []byte("secret_key") // À stocker de manière sécurisée
+var profileNames = []string{
+	"aventurine",
+	"blade",
+	"boothill",
+	"dan_heng",
+	"feixiao",
+	"firefly",
+	"jing_yuan",
+	"jingliu",
+	"kafka",
+	"robin",
+	"ruan_mei",
+	"silver_wolf",
+	"sparkle",
+	"sunday",
+	"the_herta",
+}
+
+func getRandomProfile() string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return profileNames[r.Intn(len(profileNames))]
+}
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Réception d'une requête POST sur /createUser")
@@ -66,6 +88,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		{Rarity: 5, Quantity: 0},
 	}
 	newUser.Stats = model.Stats{PlayedQuizzes: 0, WinQuizzes: 0}
+	newUser.Picture = "/src/assets/profils/" + getRandomProfile() + ".png"
 
 	// Insertion en base
 	_, err = db.InsertUser(client, newUser)
@@ -209,38 +232,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Déconnexion réussie.")
 }
 
-// SetPictureHandler gère la mise à jour de l'image de profil d'un utilisateur
-func SetPictureHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Réception d'une requête POST sur /setPicture")
-	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
-		return
-	}
-	var requestData struct {
-		UserID  string `json:"userID"`
-		Picture string `json:"picture"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		http.Error(w, "Données invalides", http.StatusBadRequest)
-		return
-	}
-	client := db.Connect()
-	defer client.Disconnect(context.TODO())
-
-	err := db.SetUserPicture(client, requestData.UserID, requestData.Picture)
-	if err != nil {
-		log.Printf("Erreur mise à jour de l'image: %v\n", err)
-		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
-		return
-	}
-
-	response := model.ApiResponse{
-		Status:  http.StatusOK,
-		Message: "Image de profil mise à jour avec succès",
-	}
-	json.NewEncoder(w).Encode(response)
-}
-
 // DeleteUserHandler s'occupe de la suppression d'un utilisateur
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Réception d'une requête DELETE sur /deleteUser")
@@ -264,9 +255,9 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Compte utilisateur supprimé avec succès"})
 }
 
-// UpdateUserPseudoHandler s'occupe de la mise à jour du pseudo d'un utilisateur
-func UpdateUserPseudoHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Réception d'une requête PUT sur /updatePseudo")
+// UpdateUserUsernameHandler s'occupe de la mise à jour du username d'un utilisateur
+func UpdateUserUsernameHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Réception d'une requête PUT sur /updateUsername")
 	if r.Method != http.MethodPut {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
@@ -274,8 +265,40 @@ func UpdateUserPseudoHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	userID := vars["userid"]
+
 	var requestData struct {
-		NewPseudo string `json:"newPseudo"`
+		NewUsername string `json:"newUsername"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Erreur lors du décodage du nouveau username du joueur", http.StatusBadRequest)
+		return
+	}
+
+	client := db.Connect()
+	defer client.Disconnect(context.TODO())
+
+	err := db.UpdateUserUsername(client, userID, requestData.NewUsername)
+	if err != nil {
+		http.Error(w, "Erreur lors de la mise à jour du username", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Username mis à jour avec succès"})
+}
+
+// UpdateUserPictureHandler gère la mise à jour de l'image de profil d'un utilisateur
+func UpdateUserPictureHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Réception d'une requête PUT sur /updatePicture")
+	if r.Method != http.MethodPut {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	vars := mux.Vars(r)
+	userID := vars["userid"]
+
+	var requestData struct {
+		NewPicture string `json:"newPicture"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
@@ -285,13 +308,18 @@ func UpdateUserPseudoHandler(w http.ResponseWriter, r *http.Request) {
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
 
-	err := db.UpdateUserPseudo(client, userID, requestData.NewPseudo)
+	err := db.SetUserPicture(client, userID, requestData.NewPicture)
 	if err != nil {
-		http.Error(w, "Erreur lors de la mise à jour du pseudo", http.StatusInternalServerError)
+		log.Printf("Erreur mise à jour de l'image: %v\n", err)
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Pseudo mis à jour avec succès"})
+	response := model.ApiResponse{
+		Status:  http.StatusOK,
+		Message: "Image de profil mise à jour avec succès",
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 // UpdateUserPasswordHandler s'occupe de la mise à jour du mot de passe d'un utilisateur
@@ -357,6 +385,7 @@ func GetUserCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 type UserRanking struct {
 	Username string `bson:"username"`
 	Level    int    `bson:"level"`
+	Picture  string `bson:"picture"`
 }
 
 func GetTopPlayers(w http.ResponseWriter, r *http.Request) {
