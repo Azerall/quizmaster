@@ -363,7 +363,7 @@ func UpdateUser(client *mongo.Client, user model.User) (*mongo.UpdateResult, err
 	}
 
 	updateData := bson.M{
-		"level":                user.Level,
+		"experience":           user.Experience,
 		"coins":                user.Coins,
 		"inventory":            user.Inventory,
 		"stats.quizzes_played": user.Stats.PlayedQuizzes,

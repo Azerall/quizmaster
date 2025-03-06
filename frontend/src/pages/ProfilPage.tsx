@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const ProfilPage = () => {
-  const { user, updateUser, fetchFromBackend } = useAuth();
+  const { user, updateUser, fetchFromBackend, calculateLevel } = useAuth();
 
   const [editUsername, setEditUsername] = useState(false);
   const [editPicture, setEditPicture] = useState(false);
@@ -167,7 +167,7 @@ const ProfilPage = () => {
                   )}
                 </div>
               </div>
-              <p className="text-[#9A60D1] text-lg">Niveau : {user?.Level}</p>
+              <p className="text-[#9A60D1] text-lg">Niveau : {calculateLevel(user?.Experience)}</p>
               <p className="text-[#9A60D1] text-lg">Crédits : {user?.Coins} 💎</p>
             </div>
 

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 interface User {
     ID: string;
     Username: string;
-    Level: number;
+    Experience: number;
     Coins: number;
     Picture: string;
     Inventory: any[];

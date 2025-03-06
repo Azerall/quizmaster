@@ -80,7 +80,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	newUser.Password = string(hashedPassword)
 
 	// Initialisation des valeurs par défaut
-	newUser.Level = 1
+	newUser.Experience = 0
 	newUser.Coins = 0
 	newUser.Inventory = []model.CheatSheet{
 		{Rarity: 3, Quantity: 0},
@@ -383,9 +383,9 @@ func GetUserCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserRanking struct {
-	Username string `bson:"username"`
-	Level    int    `bson:"level"`
-	Picture  string `bson:"picture"`
+	Username   string `bson:"username"`
+	Experience int    `bson:"experience"`
+	Picture    string `bson:"picture"`
 }
 
 func GetTopPlayers(w http.ResponseWriter, r *http.Request) {
@@ -397,7 +397,7 @@ func GetTopPlayers(w http.ResponseWriter, r *http.Request) {
 	// Sélection de la collection
 	collection := client.Database("DB").Collection("users")
 
-	cursor, err := collection.Find(context.TODO(), bson.M{}, options.Find().SetSort(bson.D{{"level", -1}}).SetLimit(5))
+	cursor, err := collection.Find(context.TODO(), bson.M{}, options.Find().SetSort(bson.D{{"experience", -1}}).SetLimit(5))
 	if err != nil {
 		http.Error(w, "Erreur lors de la récupération des utilisateurs", http.StatusInternalServerError)
 		return

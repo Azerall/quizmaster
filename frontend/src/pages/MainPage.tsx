@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const { user, fetchFromBackend } = useAuth();
+  const { user, fetchFromBackend, calculateLevel } = useAuth();
 
   if (user) console.log(user);
 
-  const [topPlayers, setTopPlayers] = useState<{ Username: string; Level: number; Picture: string }[]>([]);
+  const [topPlayers, setTopPlayers] = useState<{ Username: string; Experience: number; Picture: string }[]>([]);
 
   useEffect(() => {
     fetchTopPlayers();
@@ -56,7 +56,7 @@ const MainPage = () => {
           <div className="bg-[#292047] text-white shadow-lg p-6 rounded-b-lg">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-[#E470A3]">{user?.Username}</h2>
-              <p className="text-[#9A60D1]">Niveau : {user?.Level}</p>
+              <p className="text-[#9A60D1]">Niveau : {calculateLevel(user?.Experience)}</p>
               <p className="text-[#9A60D1]">Crédits : {user?.Coins} 💎</p>
             </div>
           </div>
@@ -112,7 +112,7 @@ const MainPage = () => {
                     />
                     <span className="text-sm font-semibold">#{index + 1} {player.Username}</span>
                   </div>
-                  <span className="text-[#FFD700] text-sm">⭐ {player.Level}</span>
+                  <span className="text-[#FFD700] text-sm">⭐ {calculateLevel(player.Experience)}</span>
                 </li>
               ))}
             </ul>

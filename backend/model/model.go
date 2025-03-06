@@ -1,15 +1,15 @@
 package model
 
 type User struct {
-	ID        string       `bson:"_id,omitempty"`
-	Username  string       `bson:"username"`
-	Password  string       `bson:"password"`
-	Token     string       `bson:"token"`
-	Level     int          `bson:"level"`
-	Coins     int          `bson:"coins"`
-	Picture   string       `bson:"picture"`
-	Inventory []CheatSheet `bson:"inventory"`
-	Stats     Stats        `bson:"stats"`
+	ID         string       `bson:"_id,omitempty"`
+	Username   string       `bson:"username"`
+	Password   string       `bson:"password"`
+	Token      string       `bson:"token"`
+	Experience int          `bson:"experience"`
+	Coins      int          `bson:"coins"`
+	Picture    string       `bson:"picture"`
+	Inventory  []CheatSheet `bson:"inventory"`
+	Stats      Stats        `bson:"stats"`
 }
 
 type Stats struct {
