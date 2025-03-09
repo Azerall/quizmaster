@@ -486,6 +486,8 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) ([]in
 		randomValue := rand.Float64()
 		var rarity int
 		if randomValue <= 0.05 {
+			rarity = 6
+		} else if randomValue <= 0.1 {
 			rarity = 5
 		} else if randomValue <= 0.2 {
 			rarity = 4

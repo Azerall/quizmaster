@@ -86,6 +86,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		{Rarity: 3, Quantity: 0},
 		{Rarity: 4, Quantity: 0},
 		{Rarity: 5, Quantity: 0},
+		{Rarity: 6, Quantity: 0},
 	}
 	newUser.Stats = model.Stats{PlayedQuizzes: 0, WinQuizzes: 0}
 	newUser.Picture = "/src/assets/profils/" + getRandomProfile() + ".png"

@@ -29,6 +29,8 @@ const QuizGame = () => {
   const [isAnswerChecked, setIsAnswerChecked] = useState<boolean>(false);
   const [mark, setMark] = useState<number>(0);
   const [showResults, setShowResults] = useState<boolean>(false);
+  const [showChat, setShowChat] = useState<boolean>(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
 
   useEffect(() => {
@@ -116,6 +118,7 @@ const QuizGame = () => {
       setHasUsedCheatsheet(false);
       setCheatsheet([]);
       setCorrectAnswer("");
+      setShowChat(false);
     } else {
       // navigate("/dashboard");
       setShowResults(true);
@@ -129,9 +132,16 @@ const QuizGame = () => {
         updatedInventory[index].quantity -= 1;
 
         updateUser({ ...user, Inventory: updatedInventory });
-
         setHasUsedCheatsheet(true);
-        handleCheatSheet(index);
+
+        if(index + 3 < 6) {
+          handleCheatSheet(index);
+        }
+        else {
+          setShowChat(true);
+        }
+
+
       }
     }
   };
@@ -284,7 +294,7 @@ const QuizGame = () => {
           >
             <div className="mr-4">
               <img
-                src={`/images/cheatsheets/rarity${cheatsheet.rarity}.png`}
+                src={`/images/cheatsheets/rarity${cheatsheet.rarity === 6 ? 'AI' : cheatsheet.rarity}.png`}
                 alt="Cheatsheet"
                 className="w-20 h-20 rounded-lg"
                 style={{ background: "transparent" }}
@@ -314,6 +324,63 @@ const QuizGame = () => {
           </li>
         ))}
       </ul>
+
+      {/* Fenêtre de chat textuel */}
+      {/* {showChat && (
+        <div className="fixed bottom-4 right-4 p-4 bg-white rounded-2xl shadow-xl w-80 h-72 flex flex-col border border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Chat AI</h2>
+          <div className="flex-1 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+            <div className="text-gray-700">Bienvenue dans le chat AI !</div>
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <input
+              type="text"
+              className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="Tapez votre message..."
+            />
+            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+              Envoyer
+            </button>
+          </div>
+        </div>
+      )} */}
+
+
+{showChat && (
+  <div
+    className={`fixed bottom-4 right-4 p-4 bg-white rounded-2xl shadow-xl w-80 border border-gray-200 transition-all ${
+      isMinimized ? "h-16" : "h-72"
+    }`}
+  >
+    <div className="flex justify-between items-center mb-2">
+      <h2 className="text-lg font-semibold text-gray-800">Chat AI</h2>
+      <button onClick={() => setIsMinimized(!isMinimized)} className="text-gray-600">
+        {isMinimized ? "🔼" : "🔽"}
+      </button>
+    </div>
+    {!isMinimized && (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto p-2 bg-gray-50 rounded-lg mb-2">
+          <div className="text-gray-700">Bienvenue dans le chat AI !</div>
+        </div>
+        <div className="flex items-center mt-auto mb-10">
+          <input
+            type="text"
+            className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Tapez votre message..."
+          />
+          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+            Envoyer
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+
+
+
     </div>
   );
 };

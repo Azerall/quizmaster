@@ -167,14 +167,19 @@ const GachaPage = () => {
                     background: "#ffd700", // Gold
                     boxShadow: "0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.8)",
                   },
+                  6: {
+                    background: "#4B0082", // Indigo
+                    boxShadow: "0 0 15px rgba(75, 0, 130, 0.8), 0 0 30px rgba(75, 0, 130, 0.8)",
+                  },
+
                 };
 
-                const style = rarityStyles[reward as 3 | 4 | 5] || rarityStyles[5]; // Default to gold if reward is out of range
+                const style = rarityStyles[reward as 3 | 4 | 5 | 6] || rarityStyles[5]; // Default to gold if reward is out of range
 
                 return (
                   <img
                     key={index}
-                    src={`/images/cheatsheets/rarity${reward}.png`}
+                    src={`/images/cheatsheets/rarity${reward === 6 ? 'AI' : reward}.png`}
                     alt={`Reward ${reward}`}
                     className="w-24 h-24 m-2 rounded-lg shadow-md"
                     style={style}
