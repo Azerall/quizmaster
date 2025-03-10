@@ -31,7 +31,8 @@ const QuizGame = () => {
   const [showResults, setShowResults] = useState<boolean>(false);
   const [showChat, setShowChat] = useState<boolean>(false);
   const [isMinimized, setIsMinimized] = useState(false);
-
+  const [message, setMessage] = useState<string>("");
+  const [chat, setChat] = useState<{ sender: string; text: string }[]>([]);
 
   useEffect(() => {
     if (selectedCategory && allCategories) {
@@ -119,6 +120,7 @@ const QuizGame = () => {
       setCheatsheet([]);
       setCorrectAnswer("");
       setShowChat(false);
+      setChat([]);
     } else {
       // navigate("/dashboard");
       setShowResults(true);
@@ -163,6 +165,48 @@ const QuizGame = () => {
       console.error("Erreur lors de la requête:", error);
     }
   };
+
+
+
+  const handleChatBotAI = async () => {
+    if (!message.trim()) return;
+    const API_KEY = "c70ef855be25482d8570fc24273c1a66"
+
+    const userMessage = { sender: "user", text: message };
+    // setChat([...chat, userMessage]);
+    setChat( (prevChat) => [...prevChat, userMessage] );
+    
+    try {
+      const response = await fetch("https://api.aimlapi.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "Tu es un chatbot utile." },
+            { role: "user", content: message },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      if (data.choices && data.choices.length > 0) {
+        
+        const botMessage = { sender: "bot", text: data.choices[0].message.content };
+        // setChat([...chat, botMessage]);
+        setChat( (prevChat) => [...prevChat, botMessage] );
+
+      }
+    } catch (error) {
+      console.error("Erreur lors de la requête du Chat AI:", error);
+    }
+    setMessage("");
+  };
+
+
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -325,59 +369,47 @@ const QuizGame = () => {
         ))}
       </ul>
 
-      {/* Fenêtre de chat textuel */}
-      {/* {showChat && (
-        <div className="fixed bottom-4 right-4 p-4 bg-white rounded-2xl shadow-xl w-80 h-72 flex flex-col border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Chat AI</h2>
-          <div className="flex-1 overflow-y-auto p-2 bg-gray-50 rounded-lg">
-            <div className="text-gray-700">Bienvenue dans le chat AI !</div>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              type="text"
-              className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Tapez votre message..."
-            />
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-              Envoyer
+
+      {showChat && (
+        <div
+          className={`fixed bottom-4 right-4 p-4 bg-white rounded-2xl shadow-xl w-80 border border-gray-200 transition-all ${
+            isMinimized ? "h-16" : "h-150"
+          }`}
+        >
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold text-gray-800">Chat AI</h2>
+            <button onClick={() => setIsMinimized(!isMinimized)} className="text-gray-600">
+              {isMinimized ? "🔼" : "🔽"}
             </button>
           </div>
+          {!isMinimized && (
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-y-auto p-2 bg-gray-50 rounded-lg mb-2">
+              <div className="text-gray-700 mb-2">Bienvenue dans le chat AI !</div>
+                {chat.map((message, index) => (
+                  <div key={index} className={`mb-2 p-2 rounded-lg ${message.sender === "user" ? "bg-blue-100 text-right" : "bg-gray-100 text-left"}`}>
+                    <span className="text-gray-700">{message.text}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center mt-auto mb-10">
+                <input
+                  type="text"
+                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder="Tapez votre message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleChatBotAI()}
+                />
+                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                        onClick={handleChatBotAI}>
+                  Envoyer
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )} */}
-
-
-{showChat && (
-  <div
-    className={`fixed bottom-4 right-4 p-4 bg-white rounded-2xl shadow-xl w-80 border border-gray-200 transition-all ${
-      isMinimized ? "h-16" : "h-72"
-    }`}
-  >
-    <div className="flex justify-between items-center mb-2">
-      <h2 className="text-lg font-semibold text-gray-800">Chat AI</h2>
-      <button onClick={() => setIsMinimized(!isMinimized)} className="text-gray-600">
-        {isMinimized ? "🔼" : "🔽"}
-      </button>
-    </div>
-    {!isMinimized && (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto p-2 bg-gray-50 rounded-lg mb-2">
-          <div className="text-gray-700">Bienvenue dans le chat AI !</div>
-        </div>
-        <div className="flex items-center mt-auto mb-10">
-          <input
-            type="text"
-            className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Tapez votre message..."
-          />
-          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-            Envoyer
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
-)}
-
+      )}
 
 
 
