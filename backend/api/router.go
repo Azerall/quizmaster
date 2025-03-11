@@ -33,6 +33,7 @@ func ConfigureRoutes() *mux.Router {
 	r.HandleFunc("/api/user/deleteUser/{userid}", handlers.DeleteUserHandler).Methods("DELETE")
 	r.HandleFunc("/api/user/getUserCategories", handlers.GetUserCategoriesHandler).Methods("GET")
 	r.HandleFunc("/api/user/createCategory", handlers.CreateCategoryHandler).Methods("POST")
+	r.HandleFunc("/api/user/updateCategory", handlers.UpdateCategoryHandler).Methods("PUT")
 	r.HandleFunc("/api/user/getUser/{username}", handlers.GetUserByNameHandler).Methods("GET")
 	r.HandleFunc("/api/user/getTopPlayers", handlers.GetTopPlayers).Methods("GET")
 
@@ -41,6 +42,9 @@ func ConfigureRoutes() *mux.Router {
 	r.HandleFunc("/api/quiz/verifyAnswer", handlers.VerifyAnswer).Methods("POST")
 	r.HandleFunc("/api/quiz/createQuestion", handlers.CreateQuestionHandler).Methods("POST")
 	r.HandleFunc("/api/quiz/createQuiz/{category}", handlers.CreateQuizHandler).Methods("POST")
+
+	// Handlers pour les endpoints de l'API AIMLAPI
+	r.HandleFunc("/api/chat", handlers.ChatHandler).Methods("POST")
 
 	// Handlers pour les endpoints de l'API gacha
 	r.HandleFunc("/api/gacha/pull", handlers.PullHandler).Methods("POST")

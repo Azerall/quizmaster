@@ -1,15 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const CreateCategoryPage = () => {
+  const location = useLocation();
   const navigate = useNavigate();
+
   const { user, fetchFromBackend } = useAuth();
+  const { selectedCategory } = location.state || {};
 
   const [categoryName, setCategoryName] = useState("");
   const [questions, setQuestions] = useState([
     { question: "", correctAnswer: "", wrongAnswers: ["", "", ""] }
   ]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      console.log("Catégorie en cours de modification :", selectedCategory);
+
+      const transformedQuestions = selectedCategory.Questions.map((q: { question_text: string; response_correct: string; responses: string[] }) => {
+        const correctAnswer = q.response_correct;
+        /// Exclure uniquement la première occurrence de la réponse correcte
+        const firstCorrectIndex = q.responses.indexOf(correctAnswer);
+        const wrongAnswers = q.responses.filter((_, index) => index !== firstCorrectIndex);
+        return {
+          question: q.question_text,
+          correctAnswer: correctAnswer,
+          wrongAnswers: wrongAnswers.length === 3 ? wrongAnswers : [...wrongAnswers]
+        };
+      });
+
+      setCategoryName(selectedCategory.CategoryName);
+      setQuestions(transformedQuestions);
+    }
+  }, [selectedCategory]);
 
   const handleAddQuestion = () => {
     setQuestions([
@@ -39,28 +63,64 @@ const CreateCategoryPage = () => {
 
     if (!categoryName) return alert("Le nom de la catégorie est requis.");
     if (!user?.Username) return alert("Utilisateur non identifié.");
+    if (questions.length < 10) return alert("Veuillez ajoutez au minimum 10 questions.");
 
     // Filtrer les questions vides et structurer les données
     const validQuestions = questions
-      .filter(q => q.question.trim() !== "" && q.correctAnswer.trim() !== "")
+      .filter(q =>
+        q.question.trim() !== "" &&
+        q.correctAnswer.trim() !== "" &&
+        q.wrongAnswers.every(w => w.trim() !== "") // Vérifie que toutes les wrongAnswers sont non vides
+      )
       .map(q => ({
         question_text: q.question,
         response_correct: q.correctAnswer,
-        responses: [...q.wrongAnswers.filter(r => r.trim() !== ""), q.correctAnswer]
+        responses: [...q.wrongAnswers, q.correctAnswer] // Combine wrongAnswers et correctAnswer
       }));
 
+    if (validQuestions.length < 10) {
+      return alert("Veuillez remplir toutes les questions, réponses correctes et mauvaises réponses.");
+    }
+
     try {
-      const categoryResponse = await fetchFromBackend("/api/user/createCategory", "POST",
-        JSON.stringify({
-          username: user.Username,
-          categoryname: categoryName,
-          questions: validQuestions
-        })
-      );
+      if (selectedCategory) {
+        const categoryResponse = await fetchFromBackend(
+          "/api/user/updateCategory",
+          "PUT", // ou "POST" selon votre choix final
+          JSON.stringify({
+            username: user.Username,
+            categoryname: selectedCategory.CategoryName,
+            newCategoryName: categoryName,
+            questions: validQuestions
+          })
+        );
 
-      if (!categoryResponse.ok) throw new Error("Erreur lors de la création de la catégorie.");
+        if (!categoryResponse.ok) {
+          if (categoryResponse.status === 409) { // StatusConflict
+            throw new Error("Le nouveau nom de catégorie existe déjà.");
+          }
+          throw new Error("Erreur lors de la modification de la catégorie.");
+        }
 
-      alert("Catégorie créée avec succès !");
+        alert("Catégorie modifiée avec succès !");
+      } else {
+        const categoryResponse = await fetchFromBackend("/api/user/createCategory", "POST",
+          JSON.stringify({
+            username: user.Username,
+            categoryname: categoryName,
+            questions: validQuestions
+          })
+        );
+
+        if (!categoryResponse.ok) {
+          if (categoryResponse.status === 409) { // StatusConflict
+            throw new Error("La catégorie existe déjà.");
+          }
+          throw new Error("Erreur lors de la création de la catégorie.");
+        }
+
+        alert("Catégorie créée avec succès !");
+      }
       navigate("/quizzes");
     } catch (error) {
       console.error(error);
@@ -100,12 +160,13 @@ const CreateCategoryPage = () => {
                     ✕
                   </button>
                   <div className="w-full flex justify-center mb-5">
+                    <label className="p-2 text-[#40C4FF] text-lg">{index + 1}. </label>
                     <input
                       type="text"
                       placeholder="Question"
                       value={q.question}
                       onChange={(e) => handleQuestionChange(index, "question", e.target.value)}
-                      className="w-2/3 p-2 bg-[#292047] border-b-2 border-[#40C4FF] text-[#40C4FF] text-center outline-none rounded-none"
+                      className="w-2/3 p-2  border-b-2 border-[#40C4FF] text-[#40C4FF] text-center outline-none rounded-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2 w-full">
@@ -147,7 +208,7 @@ const CreateCategoryPage = () => {
                   boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6), 0px 0px 25px rgba(228, 112, 163, 0.4)",
                 }}
               >
-                Créer la Catégorie
+                { selectedCategory ? "Modifier" : "Créer" } la Catégorie
               </button>
               <button
                 type="button"

@@ -43,7 +43,7 @@ const MainPage = () => {
             {/* Image de profil centrée */}
             <div className="absolute top-7 left-1/2 transform -translate-x-1/2">
               <div
-                className="w-35 h-35 rounded-full flex items-center justify-center border-4 border-white"
+                className="w-35 h-35 rounded-full flex items-center justify-center"
                 style={{
                   boxShadow: "0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.8)",
                 }}

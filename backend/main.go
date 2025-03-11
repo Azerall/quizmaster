@@ -41,5 +41,4 @@ func main() {
 	if err := http.ListenAndServe("0.0.0.0:8080", corsOpts(router)); err != nil {
 		log.Fatalf("Error starting server: %s\n", err)
 	}
-
 }

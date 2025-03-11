@@ -49,41 +49,29 @@ const GachaPage = () => {
   };
 
   return (
-    <div className="h-screen pt-[100px] flex flex-col items-center bg-[url('/images/gacha_background.png')] bg-cover bg-center p-10">
+    <div className="h-screen pt-[100px] flex flex-col items-center">
       <h1 className="text-[#E470A3] text-4xl font-bold mb-6">Gacha</h1>
 
       {/* Machine Gacha */}
-      <div className="p-8 flex flex-col items-center relative">
+      <div className="flex flex-col items-center relative">
         
-      {/* Affichage des coins dans un fond circulaire */}
+      {/* Affichage des coins */}
       <div
-        className="absolute -top-15 -left-50 rounded-full flex items-center justify-center"
+        className="absolute -top-5 -left-20 flex items-center justify-center pl-6 pr-4 py-4 text-xl font-bold text-white rounded-lg"
         style={{
-          background: "url('/images/coins_background.png') no-repeat center/cover",
-          width: "175px",
-          height: "175px"
+          background: "linear-gradient(90deg, #E470A3, #9A60D1)",
+          boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6), 0px 0px 25px rgba(228, 112, 163, 0.4)",
         }}
       >
-        <span className="text-lg pt-2 pl-3 font-bold text-[#E470A3]">{user?.Coins}</span>
-        <span>💎</span>
+        <span>{user?.Coins} 💎</span>
       </div>
-
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('/images/gold_background2.png')] bg-no-repeat bg-cover z-10"></div>
-        <div
-          className="p-15 top-5 flex flex-col items-center relative z-0"
-          style={{
-            backgroundImage: `url('/images/gold_background.png')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
+      
+        <div className="flex flex-col items-center relative z-0">
           <img
             src="/images/gacha_machine.png"
             alt="Gacha Machine"
-            width={325}
-            height={325}
-            className="rounded-2xl mb-6 transform scale-140"
+            width={600}
+            height={600}
           />
         </div>
       </div>
@@ -92,7 +80,7 @@ const GachaPage = () => {
       <div className="flex gap-20 mt-8">
         <button
           onClick={() => handlePull(new Event("click"), 1)}
-          className="flex items-center gap-3 bg-[#E470A3] text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg hover:bg-[#D65F8F] hover:shadow-xl transition duration-300"
+          className="flex items-center gap-3 bg-[#E470A3] text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg hover:bg-[#D65F8F] hover:shadow-xl transition-transform transform hover:scale-105"
           style={{
             boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6), 0px 0px 25px rgba(228, 112, 163, 0.4)",
           }}
@@ -104,7 +92,7 @@ const GachaPage = () => {
 
         <button
           onClick={() => handlePull(new Event("click"), 10)}
-          className="relative flex items-center gap-3 bg-[#E470A3] text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg hover:bg-[#D65F8F] hover:shadow-xl transition duration-300"
+          className="relative flex items-center gap-3 bg-[#E470A3] text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg hover:bg-[#D65F8F] hover:shadow-xl transition-transform transform hover:scale-105"
           style={{
             boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6), 0px 0px 25px rgba(228, 112, 163, 0.4)",
           }}

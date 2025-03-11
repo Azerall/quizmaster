@@ -10,7 +10,9 @@ interface User {
     Inventory: any[];
     Stats: {
         quizzes_played: number;
-        quizzes_win: number;
+        correct_responses: number;
+        full_marks: number;
+        used_cheat_sheets: number;
     };
 }
 
@@ -21,7 +23,7 @@ interface AuthContextType {
     logout: () => void;
     updateUser?: (user: User) => void;
     fetchFromBackend: (endpoint: string, method: string, body?: any) => Promise<Response>;
-    calculateLevel: (experience: number) => number;
+    calculateLevel: (experience?: number) => number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -80,7 +82,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     // Fonction pour calculer le niveau en fonction de l'expérience
-    const calculateLevel = (experience: number) => {
+    const calculateLevel = (experience?: number) => {
+        if (!experience) {
+            return 1;
+        }
         const level = Math.max(1, Math.floor(2 * Math.log(experience) - 4));
         return level;
     }

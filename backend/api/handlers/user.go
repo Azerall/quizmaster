@@ -81,14 +81,14 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Initialisation des valeurs par défaut
 	newUser.Experience = 0
-	newUser.Coins = 0
+	newUser.Coins = 100
 	newUser.Inventory = []model.CheatSheet{
-		{Rarity: 3, Quantity: 0},
-		{Rarity: 4, Quantity: 0},
-		{Rarity: 5, Quantity: 0},
-		{Rarity: 6, Quantity: 0},
+		{Rarity: 3, Quantity: 1},
+		{Rarity: 4, Quantity: 1},
+		{Rarity: 5, Quantity: 1},
+		{Rarity: 6, Quantity: 1},
 	}
-	newUser.Stats = model.Stats{PlayedQuizzes: 0, WinQuizzes: 0}
+	newUser.Stats = model.Stats{PlayedQuizzes: 0, CorrectResponses: 0, FullMarks: 0, UsedCheatSheets: 0}
 	newUser.Picture = "/src/assets/profils/" + getRandomProfile() + ".png"
 
 	// Insertion en base
@@ -363,10 +363,6 @@ func GetUserCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Extraire l'username des paramètres de requête
 	username := r.URL.Query().Get("username")
-	if username == "" {
-		http.Error(w, "Nom d'utilisateur manquant", http.StatusBadRequest)
-		return
-	}
 
 	client := db.Connect()
 	defer client.Disconnect(context.TODO())
@@ -379,8 +375,13 @@ func GetUserCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(categories)
+	json.NewEncoder(w).Encode(model.ApiResponse{
+		Status:  http.StatusOK,
+		Message: "Catégories récupérées avec succès",
+		Data:    categories,
+	})
 }
 
 type UserRanking struct {
@@ -467,4 +468,75 @@ func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Catégorie créée avec succès: %s pour %s", categoryData.CategoryName, categoryData.Username)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Catégorie créée avec succès"})
+}
+
+func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut { // Changement ici
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusMethodNotAllowed, Message: "Méthode non autorisée"})
+		return
+	}
+
+	var categoryData struct {
+		Username        string           `json:"username"`
+		CategoryName    string           `json:"categoryname"`
+		NewCategoryName string           `json:"newCategoryName"`
+		Questions       []model.Question `json:"questions"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&categoryData); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Données invalides"})
+		return
+	}
+	log.Printf("Données reçues - Utilisateur: %s, Catégorie actuelle: %s, Nouveau nom: %s", categoryData.Username, categoryData.CategoryName, categoryData.NewCategoryName)
+
+	if categoryData.Username == "" || categoryData.CategoryName == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusBadRequest, Message: "Le nom de l'utilisateur et le nom actuel de la catégorie sont requis"})
+		return
+	}
+
+	client := db.Connect()
+	defer client.Disconnect(context.Background())
+
+	// Vérifier si la catégorie existe pour cet utilisateur
+	exists, err := db.CategoryExists(client, categoryData.Username, categoryData.CategoryName)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification de la catégorie"})
+		return
+	}
+	if !exists {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusNotFound, Message: "La catégorie n'existe pas"})
+		return
+	}
+
+	// Si newCategoryName est différent et non vide, vérifier qu'il n'existe pas déjà
+	if categoryData.NewCategoryName != "" && categoryData.NewCategoryName != categoryData.CategoryName {
+		exists, err = db.CategoryExists(client, categoryData.Username, categoryData.NewCategoryName)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification du nouveau nom de catégorie"})
+			return
+		}
+		if exists {
+			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusConflict, Message: "Le nouveau nom de catégorie existe déjà"})
+			return
+		}
+	}
+
+	// Mettre à jour la catégorie
+	err = db.UpdateCategory(client, categoryData.Username, categoryData.CategoryName, categoryData.NewCategoryName, categoryData.Questions)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la mise à jour de la catégorie"})
+		return
+	}
+
+	log.Printf("Catégorie mise à jour avec succès: %s (nouveau nom: %s) pour %s", categoryData.CategoryName, categoryData.NewCategoryName, categoryData.Username)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: "Catégorie mise à jour avec succès"})
 }

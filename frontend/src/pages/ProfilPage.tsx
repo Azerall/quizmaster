@@ -76,7 +76,7 @@ const ProfilPage = () => {
             {/* Image de profil centrée cliquable */}
             <div className="absolute top-7 left-1/2 transform -translate-x-1/2">
               <div
-                className="w-35 h-35 rounded-full flex items-center justify-center border-4 border-white cursor-pointer"
+                className="w-35 h-35 rounded-full flex items-center justify-center cursor-pointer"
                 onClick={() => setEditPicture(!editPicture)} // Ouvre l'édition pour la photo
                 style={{
                   boxShadow: "0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.8)",
@@ -101,7 +101,7 @@ const ProfilPage = () => {
                     key={user.Picture}
                     src={user.Picture}
                     alt={`Option courante ${user.Picture.split('/').pop()?.split('.').shift() || "Photo"}`}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-white cursor-pointer"
+                    className="w-16 h-16 rounded-full object-cover cursor-pointer"
                     style={{
                       boxShadow: "0 0 15px rgba(0, 255, 255, 0.8), 0 0 10px rgba(0, 255, 255, 0.8)",
                     }}
@@ -118,7 +118,7 @@ const ProfilPage = () => {
                       key={image}
                       src={image}
                       alt={`Option ${image.split('/').pop()?.split('.').shift() || "Photo"}`}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-transparent cursor-pointer hover:border-white"
+                      className="w-16 h-16 rounded-full object-cover cursor-pointer hover:border-white"
                       onClick={() => {
                         handleSavePicture(image);
                       }}
@@ -151,7 +151,7 @@ const ProfilPage = () => {
                         onClick={handleSaveUsername}
                         className="bg-[#E470A3] hover:bg-[#D65F8F] text-white rounded-lg px-2 py-2"
                       >
-                        <img src="/images/modify.png" alt="Sauvegarder" className="w-5 h-5" />
+                        <img src="/images/modify.png" alt="✏" className="w-5 h-5" />
                       </button>
                     </>
                   ) : (
@@ -196,7 +196,9 @@ const ProfilPage = () => {
               <div className="p-4 rounded-lg ml-4"> {/* Ajout de ml-4 pour décaler vers la droite */}
                 <h3 className="text-xl font-bold text-[#E470A3] mb-2">Statistiques</h3>
                 <p className="text-white">Quizzes joués : {user?.Stats.quizzes_played}</p>
-                <p className="text-white">Quizzes gagnés : {user?.Stats.quizzes_win}</p>
+                <p className="text-white">Réponses correctes : {user?.Stats.correct_responses}</p>
+                <p className="text-white">Notes parfaites : {user?.Stats.full_marks}</p>
+                <p className="text-white">Antisèches utilisées : {user?.Stats.used_cheat_sheets}</p>
               </div>
 
               {/* Barre verticale blanche contenue dans les sections */}

@@ -49,7 +49,7 @@ func VerifyAnswer(w http.ResponseWriter, r *http.Request) {
 	quiz.Number_question++
 	if quiz.Number_question == len(quiz.Questions) {
 		quiz.Finish = true
-		AddStats(quiz.Username, quiz.ID)
+		AddStats(quiz.Username, quiz)
 	}
 
 	log.Printf("Mise à jour du quiz avec l'ID : %s\n", quiz.ID)
@@ -70,7 +70,7 @@ func VerifyAnswer(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusOK, Message: responseMessage, Data: response})
 }
 
-func AddStats(userName string, quizID string) {
+func AddStats(userName string, quiz model.Quiz) {
 	client := db.Connect()
 	defer client.Disconnect(context.Background())
 
@@ -80,9 +80,12 @@ func AddStats(userName string, quizID string) {
 		return
 	}
 
+	user.Experience += 10 + quiz.Mark
 	user.Stats.PlayedQuizzes += 1
-	// Faudra aussi modifier d'autres stats pour le joueur mais a voir plus tard
-	// LEVEL, COINS, INVENTORY, STATS
+	user.Stats.CorrectResponses += quiz.Mark
+	if quiz.Mark == quiz.Number_question {
+		user.Stats.FullMarks += 1
+	}
 
 	_, err = db.UpdateUser(client, user)
 	if err != nil {

@@ -166,27 +166,6 @@ func GetUserByToken(client *mongo.Client, token string) (model.User, error) {
 	return user, nil
 }
 
-// UpdateUserScores met à jour les scores de l'utilisateur
-func UpdateUserScores(client *mongo.Client, userId string, correctAnswersIncrement, experienceIncrement int, nbAnswersIncrement int) error {
-	coll := client.Database("DB").Collection("users")
-	id, err := primitive.ObjectIDFromHex(userId)
-	if err != nil {
-		return err
-	}
-	_, err = coll.UpdateOne(
-		context.TODO(),
-		bson.M{"_id": id},
-		bson.M{
-			"$inc": bson.M{
-				"correctAnswers": correctAnswersIncrement,
-				"experience":     experienceIncrement,
-				"nbAnswers":      nbAnswersIncrement,
-			},
-		},
-	)
-	return err
-}
-
 // SetUserPicture met à jour l'image de profil de l'utilisateur
 func SetUserPicture(client *mongo.Client, userId string, picture string) error {
 	coll := client.Database("DB").Collection("users")
@@ -218,7 +197,7 @@ func DeleteUser(client *mongo.Client, userID string) error {
 	}
 
 	if result.DeletedCount == 0 {
-		return errors.New("aucun utilisateur supprimé")
+		return errors.New("Aucun utilisateur supprimé")
 	}
 
 	log.Printf("Utilisateur supprimé avec succès : %v\n", result.DeletedCount)
@@ -363,11 +342,13 @@ func UpdateUser(client *mongo.Client, user model.User) (*mongo.UpdateResult, err
 	}
 
 	updateData := bson.M{
-		"experience":           user.Experience,
-		"coins":                user.Coins,
-		"inventory":            user.Inventory,
-		"stats.quizzes_played": user.Stats.PlayedQuizzes,
-		"stats.quizzes_win":    user.Stats.WinQuizzes,
+		"experience":              user.Experience,
+		"coins":                   user.Coins,
+		"inventory":               user.Inventory,
+		"stats.quizzes_played":    user.Stats.PlayedQuizzes,
+		"stats.correct_responses": user.Stats.CorrectResponses,
+		"stats.full_marks":        user.Stats.FullMarks,
+		"stats.used_cheat_sheets": user.Stats.UsedCheatSheets,
 	}
 
 	log.Printf("Mise à jour de l'inventaire de l'utilisateur avec l'ID : %s\n", user.ID)
@@ -529,8 +510,13 @@ func GetCheatSheet(client *mongo.Client, userName string, number_pull int) ([]in
 func GetUserCategories(client *mongo.Client, username string) ([]model.Category, error) {
 	collection := client.Database("DB").Collection("categories")
 
-	// Filtrer par username
-	filter := bson.M{"username": username}
+	// Définir le filtre
+	var filter bson.M
+	if username != "" {
+		filter = bson.M{"username": username}
+	} else {
+		filter = bson.M{} // Filtre vide pour récupérer toutes les catégories
+	}
 
 	// Trouver les documents
 	cursor, err := collection.Find(context.TODO(), filter)
@@ -573,6 +559,37 @@ func CreateCategory(client *mongo.Client, username string, categoryName string, 
 	return err
 }
 
+func UpdateCategory(client *mongo.Client, username, currentCategoryName, newCategoryName string, questions []model.Question) error {
+	collection := client.Database("DB").Collection("categories")
+
+	filter := bson.M{
+		"username":     username,
+		"categoryname": currentCategoryName,
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"questions": questions,
+		},
+	}
+
+	// Si un nouveau nom est fourni et différent, le mettre à jour
+	if newCategoryName != "" && newCategoryName != currentCategoryName {
+		update["$set"].(bson.M)["categoryname"] = newCategoryName
+	}
+
+	result, err := collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+	if result.MatchedCount == 0 {
+		log.Printf("❌ Aucune catégorie trouvée pour la mise à jour")
+		return err
+	}
+
+	return nil
+}
+
 func UseCheatSheet(client *mongo.Client, quizID string, rarity int) ([]string, error) {
 	coll := client.Database("DB").Collection("Quiz")
 
@@ -591,6 +608,9 @@ func UseCheatSheet(client *mongo.Client, quizID string, rarity int) ([]string, e
 	}
 
 	var hints int = 0
+	if (rarity) == 6 {
+
+	}
 	if rarity == 5 {
 		hints = 3
 	}
@@ -621,11 +641,13 @@ func UseCheatSheet(client *mongo.Client, quizID string, rarity int) ([]string, e
 
 	//Mettre a jour les cheatsheets de l'user
 	userColl := client.Database("DB").Collection("users")
-	// filter := bson.M{"username": quiz.Username}
-	// update := bson.M{"$pull": bson.M{"inventory": bson.M{"rarity": rarity, "quantity": 1}}}
-	// _, err = userColl.UpdateOne(context.TODO(), filter, update)
 	filter := bson.M{"username": quiz.Username, "inventory.rarity": rarity}
-	update := bson.M{"$inc": bson.M{"inventory.$.quantity": -1}}
+	update := bson.M{
+		"$inc": bson.M{
+			"inventory.$.quantity":    -1,
+			"stats.used_cheat_sheets": 1,
+		},
+	}
 	_, err = userColl.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		log.Printf("❌ Erreur lors de la mise à jour de l'inventaire de l'utilisateur : %v\n", err)

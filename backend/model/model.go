@@ -13,8 +13,10 @@ type User struct {
 }
 
 type Stats struct {
-	PlayedQuizzes int `bson:"quizzes_played" json:"quizzes_played"`
-	WinQuizzes    int `bson:"quizzes_win" json:"quizzes_win"`
+	PlayedQuizzes    int `bson:"quizzes_played" json:"quizzes_played"`
+	CorrectResponses int `bson:"correct_responses" json:"correct_responses"`
+	FullMarks        int `bson:"full_marks" json:"full_marks"`
+	UsedCheatSheets  int `bson:"used_cheat_sheets" json:"used_cheat_sheets"`
 }
 
 type CheatSheet struct {
@@ -23,9 +25,9 @@ type CheatSheet struct {
 }
 
 type Category struct {
-	Username     string     `bson:"username"`
-	CategoryName string     `bson:"categoryname"`
-	Questions    []Question `bson:"questions"`
+	Username     string     `json:"Username" bson:"username"`
+	CategoryName string     `json:"CategoryName" bson:"categoryname"`
+	Questions    []Question `json:"Questions" bson:"questions"`
 }
 
 type Quiz struct {

@@ -23,7 +23,7 @@ const QuizGame = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [choices, setChoices] = useState<string[]>([]);  // Choix des réponses
   const [correctAnswer, setCorrectAnswer] = useState<string>("");  // Réponse correcte
-  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);  // Typé à string ou null
+  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
   const [hasUsedCheatsheet, setHasUsedCheatsheet] = useState<boolean>(false);
   const [cheatsheet, setCheatsheet] = useState<string[]>([]);
   const [isAnswerChecked, setIsAnswerChecked] = useState<boolean>(false);
@@ -68,7 +68,7 @@ const QuizGame = () => {
     try {
       const response = await fetchFromBackend(endpoint, method);
       const data = await response.json();
-
+      
       if (!response.ok) {
         throw new Error(`Erreur ${response.status}: ${data.message}`);
       }
@@ -122,8 +122,17 @@ const QuizGame = () => {
       setShowChat(false);
       setChat([]);
     } else {
-      // navigate("/dashboard");
       setShowResults(true);
+      if (user && updateUser) {
+        updateUser({ ...user, 
+          Stats: { 
+            ...user.Stats, 
+            quizzes_played: user.Stats.quizzes_played + 1, 
+            correct_responses: user.Stats.correct_responses + mark,
+            full_marks: mark === questions.length ? user.Stats.full_marks + 1 : user.Stats.full_marks,
+          } 
+        });
+      }
     }
   };
 
@@ -133,17 +142,13 @@ const QuizGame = () => {
       if (updatedInventory[index].quantity > 0) {
         updatedInventory[index].quantity -= 1;
 
-        updateUser({ ...user, Inventory: updatedInventory });
+        updateUser({ ...user, Inventory: updatedInventory, Stats: { ...user.Stats, used_cheat_sheets: user.Stats.used_cheat_sheets + 1 } });
         setHasUsedCheatsheet(true);
 
-        if(index + 3 < 6) {
-          handleCheatSheet(index);
-        }
-        else {
+        handleCheatSheet(index);
+        if (index + 3 == 6) {
           setShowChat(true);
         }
-
-
       }
     }
   };
@@ -160,53 +165,34 @@ const QuizGame = () => {
         throw new Error(`Erreur ${response.status}: ${data.message}`);
       }
       console.log("Indices reçus:", data);
-      setCheatsheet(data.data);
+      if (data.data) setCheatsheet(data.data);
     } catch (error) {
       console.error("Erreur lors de la requête:", error);
     }
   };
 
-
-
   const handleChatBotAI = async () => {
     if (!message.trim()) return;
-    const API_KEY = "c70ef855be25482d8570fc24273c1a66"
 
     const userMessage = { sender: "user", text: message };
-    // setChat([...chat, userMessage]);
-    setChat( (prevChat) => [...prevChat, userMessage] );
-    
+    setChat((prevChat) => [...prevChat, userMessage]);
+
     try {
-      const response = await fetch("https://api.aimlapi.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: "Tu es un chatbot utile." },
-            { role: "user", content: message },
-          ],
-        }),
-      });
+      const response = await fetchFromBackend("/api/chat", "POST", JSON.stringify({ message: message }));
 
       const data = await response.json();
-      if (data.choices && data.choices.length > 0) {
-        
-        const botMessage = { sender: "bot", text: data.choices[0].message.content };
-        // setChat([...chat, botMessage]);
-        setChat( (prevChat) => [...prevChat, botMessage] );
-
+      console.log("Réponse de l'API Chat AI:", data);
+      if (data.status === 200) {
+        const botMessage = { sender: "bot", text: data.data };
+        setChat((prevChat) => [...prevChat, botMessage]);
+      } else {
+        console.error("Erreur API:", data.message);
       }
     } catch (error) {
       console.error("Erreur lors de la requête du Chat AI:", error);
     }
     setMessage("");
   };
-
-
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -258,14 +244,14 @@ const QuizGame = () => {
                   <button
                     key={index}
                     className={`py-3 px-6 text-lg font-semibold rounded-lg shadow-md transition-all duration-200 ${isAnswerChecked
-                        ? choice === correctAnswer
-                          ? "bg-[#4CAF50] text-white"
-                          : "bg-[#F44336] text-white"
-                        : isDisabled
-                          ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-                          : selectedChoice === choice
-                            ? "bg-[#9A60D1] text-white"
-                            : "bg-[#E470A3] text-white hover:bg-[#9A60D1]"
+                      ? choice === correctAnswer
+                        ? "bg-[#4CAF50] text-white"
+                        : "bg-[#F44336] text-white"
+                      : isDisabled
+                        ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                        : selectedChoice === choice
+                          ? "bg-[#9A60D1] text-white"
+                          : "bg-[#E470A3] text-white hover:bg-[#9A60D1]"
                       }`}
                     onClick={() => !isDisabled && handleChoiceClick(choice)}
                     disabled={isDisabled}
@@ -291,8 +277,8 @@ const QuizGame = () => {
               {/* Bouton Vérifier */}
               <button
                 className={`py-3 px-6 text-lg font-semibold rounded-lg transition-all duration-200 ${selectedChoice && !isAnswerChecked
-                    ? "bg-[#9A60D1] text-white hover:bg-[#4A2E7A]"
-                    : "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  ? "bg-[#9A60D1] text-white hover:bg-[#4A2E7A]"
+                  : "bg-gray-600 text-gray-300 cursor-not-allowed"
                   }`}
                 onClick={handleVerify}
                 disabled={!selectedChoice || isAnswerChecked}
@@ -310,8 +296,8 @@ const QuizGame = () => {
               <button
                 type="button"
                 className={`py-3 px-6 text-lg font-semibold rounded-lg transition-all duration-200 ${isAnswerChecked
-                    ? "bg-[#9A60D1] text-white hover:bg-[#4A2E7A]"
-                    : "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  ? "bg-[#9A60D1] text-white hover:bg-[#4A2E7A]"
+                  : "bg-gray-600 text-gray-300 cursor-not-allowed"
                   }`}
                 onClick={handleNextQuestion}
                 disabled={!isAnswerChecked}
@@ -338,7 +324,7 @@ const QuizGame = () => {
           >
             <div className="mr-4">
               <img
-                src={`/images/cheatsheets/rarity${cheatsheet.rarity === 6 ? 'AI' : cheatsheet.rarity}.png`}
+                src={`/images/cheatsheets/rarity${cheatsheet.rarity}.png`}
                 alt="Cheatsheet"
                 className="w-20 h-20 rounded-lg"
                 style={{ background: "transparent" }}
@@ -350,8 +336,8 @@ const QuizGame = () => {
               </p>
               <button
                 className={`mt-2 py-1 px-4 text-sm font-semibold rounded-lg transition-all duration-200 ${hasUsedCheatsheet || cheatsheet.quantity < 1 || isAnswerChecked
-                    ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-                    : "bg-[#E470A3] text-white hover:bg-[#9A60D1]"
+                  ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  : "bg-[#E470A3] text-white hover:bg-[#9A60D1]"
                   }`}
                 onClick={() => handleUseCheatsheet(index)}
                 disabled={hasUsedCheatsheet || cheatsheet.quantity < 1}
@@ -369,40 +355,55 @@ const QuizGame = () => {
         ))}
       </ul>
 
-
       {showChat && (
         <div
-          className={`fixed bottom-4 right-4 p-4 bg-white rounded-2xl shadow-xl w-80 border border-gray-200 transition-all ${
-            isMinimized ? "h-16" : "h-150"
-          }`}
+          className={`fixed bottom-4 right-4 p-4 rounded-2xl shadow-xl w-80 transition-all ${isMinimized ? "h-16" : "h-[36rem]"
+            }`}
+          style={{
+            backgroundColor: "#292047", // Deep purple background
+            boxShadow: "0px 4px 15px rgba(64, 196, 255, 0.6), 0px 0px 25px rgba(64, 196, 255, 0.4)",
+            border: "none", // Remove gray border
+          }}
         >
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-800">Chat AI</h2>
-            <button onClick={() => setIsMinimized(!isMinimized)} className="text-gray-600">
-              {isMinimized ? "🔼" : "🔽"}
+            <h2 className="text-lg font-semibold text-[#E470A3] font-roboto">Chat AI</h2>
+            <button onClick={() => setIsMinimized(!isMinimized)} className="text-[#E470A3] hover:text-[#D65F8F]">
+              {isMinimized ? "▲" : "▼"}
             </button>
           </div>
           {!isMinimized && (
             <div className="flex flex-col h-full">
-              <div className="flex-1 overflow-y-auto p-2 bg-gray-50 rounded-lg mb-2">
-              <div className="text-gray-700 mb-2">Bienvenue dans le chat AI !</div>
+              <div className="flex-1 overflow-y-auto p-2 rounded-lg mb-3 bg-[#3A2E5F] flex flex-col"> {/* Darker purple for chat area */}
+                <div className="text-white mb-2 font-roboto">Bienvenue dans le chat AI !</div>
                 {chat.map((message, index) => (
-                  <div key={index} className={`mb-2 p-2 rounded-lg ${message.sender === "user" ? "bg-blue-100 text-right" : "bg-gray-100 text-left"}`}>
-                    <span className="text-gray-700">{message.text}</span>
+                  <div
+                    key={index}
+                    className={`mb-2 p-2 rounded-lg font-roboto inline-block max-w-[80%] 
+                      ${message.sender === "user"
+                        ? "bg-[#E470A3] text-white text-right self-end" // Pink for user messages
+                        : "bg-[#4A3E7F] text-white text-left self-start" // Dark purple for AI messages
+                      }`}
+                  >
+                    <span>{message.text}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex items-center mt-auto mb-10">
+              <div className="flex items-center gap-2 mt-auto mb-8 mr-2">
                 <input
                   type="text"
-                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="flex-1 p-2 border border-[#E470A3] rounded-lg focus:outline-none bg-[#4A3E7F] text-white placeholder-gray-300 font-roboto"
                   placeholder="Tapez votre message..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleChatBotAI()}
                 />
-                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                        onClick={handleChatBotAI}>
+                <button
+                  className="px-2 py-2 bg-[#E470A3] text-white rounded-lg hover:bg-[#D65F8F] transition font-roboto"
+                  style={{
+                    boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6)",
+                  }}
+                  onClick={handleChatBotAI}
+                >
                   Envoyer
                 </button>
               </div>
@@ -410,8 +411,6 @@ const QuizGame = () => {
           )}
         </div>
       )}
-
-
 
     </div>
   );
