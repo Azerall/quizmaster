@@ -65,8 +65,16 @@ const QuizGame = () => {
       endpoint += `?username=${encodeURIComponent(user?.Username || "")}&categoryname=${encodeURIComponent(selectedCategory)}`;
     }
 
+    let body = null;
+    if (method === "POST") {
+      body = JSON.stringify({
+        username: user?.Username,
+        categoryname: selectedCategory,
+      });
+    }
+
     try {
-      const response = await fetchFromBackend(endpoint, method);
+      const response = await fetchFromBackend(endpoint, method, body);
       const data = await response.json();
       
       if (!response.ok) {
