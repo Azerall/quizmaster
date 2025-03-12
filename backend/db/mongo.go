@@ -536,9 +536,9 @@ func GetUserCategories(client *mongo.Client, username string) ([]model.Category,
 	return categories, nil
 }
 
-func CategoryExists(client *mongo.Client, username string, categoryName string) (bool, error) {
+func CategoryExists(client *mongo.Client, categoryName string) (bool, error) {
 	collection := client.Database("DB").Collection("categories")
-	filter := bson.M{"username": username, "categoryname": categoryName}
+	filter := bson.M{"categoryname": categoryName}
 	count, err := collection.CountDocuments(context.TODO(), filter)
 	if err != nil {
 		return false, err

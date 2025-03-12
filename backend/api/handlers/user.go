@@ -445,7 +445,7 @@ func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	defer client.Disconnect(context.Background())
 
 	// Vérifier si la catégorie existe déjà pour cet utilisateur
-	exists, err := db.CategoryExists(client, categoryData.Username, categoryData.CategoryName)
+	exists, err := db.CategoryExists(client, categoryData.CategoryName)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification de la catégorie"})
@@ -453,7 +453,7 @@ func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if exists {
 		w.WriteHeader(http.StatusConflict)
-		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusConflict, Message: "La catégorie existe déjà"})
+		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusConflict, Message: "Une catégorie avec ce nom existe déjà, choissisez un autre nom"})
 		return
 	}
 
@@ -501,7 +501,7 @@ func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	defer client.Disconnect(context.Background())
 
 	// Vérifier si la catégorie existe pour cet utilisateur
-	exists, err := db.CategoryExists(client, categoryData.Username, categoryData.CategoryName)
+	exists, err := db.CategoryExists(client, categoryData.CategoryName)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification de la catégorie"})
@@ -515,7 +515,7 @@ func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Si newCategoryName est différent et non vide, vérifier qu'il n'existe pas déjà
 	if categoryData.NewCategoryName != "" && categoryData.NewCategoryName != categoryData.CategoryName {
-		exists, err = db.CategoryExists(client, categoryData.Username, categoryData.NewCategoryName)
+		exists, err = db.CategoryExists(client, categoryData.NewCategoryName)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(model.ApiResponse{Status: http.StatusInternalServerError, Message: "Erreur lors de la vérification du nouveau nom de catégorie"})

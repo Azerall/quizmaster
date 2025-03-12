@@ -114,7 +114,7 @@ const CreateCategoryPage = () => {
 
         if (!categoryResponse.ok) {
           if (categoryResponse.status === 409) { // StatusConflict
-            throw new Error("La catégorie existe déjà.");
+            throw new Error("Une catégorie avec ce nom existe déjà, choissisez un autre nom.");
           }
           throw new Error("Erreur lors de la création de la catégorie.");
         }
@@ -124,7 +124,8 @@ const CreateCategoryPage = () => {
       navigate("/quizzes");
     } catch (error) {
       console.error(error);
-      alert("Une erreur s'est produite.");
+      //alert("Une erreur s'est produite.");
+      alert(error);
     }
   };
 
