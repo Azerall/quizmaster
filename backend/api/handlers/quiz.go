@@ -194,7 +194,7 @@ func CreateQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allquestions := db.GetQuestionsByCategory(client, QuizData.Username, QuizData.CategoryName)
+	allquestions := db.GetQuestionsByCategory(client, QuizData.CategoryName)
 	if len(allquestions) < 10 {
 		log.Printf("Nombre de questions insuffisant: %d", len(allquestions))
 		w.WriteHeader(http.StatusBadRequest)

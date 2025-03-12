@@ -427,9 +427,8 @@ func ExistQuestion(client *mongo.Client, userName string, categoryName string, q
 	log.Printf("✅ Question trouvée dans la catégorie %s", categoryName)
 	return true, question, nil
 }
-
-func GetQuestionsByCategory(client *mongo.Client, userName string, categoryName string) []model.Question {
-	filter := bson.M{"username": userName, "categoryname": categoryName}
+func GetQuestionsByCategory(client *mongo.Client, categoryName string) []model.Question {
+	filter := bson.M{"categoryname": categoryName}
 	var category model.Category
 	coll := client.Database("DB").Collection("categories")
 	err := coll.FindOne(context.TODO(), filter).Decode(&category)
