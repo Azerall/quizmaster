@@ -114,11 +114,6 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defer resp.Body.Close()
 
-		if resp.StatusCode == http.StatusConflict { // 409 - Rate limit
-			log.Printf("Limite de taux atteinte avec la clé: %s", apiKey)
-			continue
-		}
-
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 			body, _ := io.ReadAll(resp.Body)
 			lastErr = fmt.Errorf("code de statut inattendu: %d, corps: %s", resp.StatusCode, string(body))
