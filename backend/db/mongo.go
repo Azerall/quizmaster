@@ -290,7 +290,8 @@ func OnGoingQuiz(client *mongo.Client, userName string) (bool, model.Quiz) {
 func CreateQuiz(client *mongo.Client, quiz model.Quiz) (model.Quiz, error) {
 	coll := client.Database("DB").Collection("Quiz")
 	log.Println("Création d'un quiz par l'API externe")
-	_, err := coll.InsertOne(context.TODO(), quiz)
+	result, err := coll.InsertOne(context.TODO(), quiz)
+	quiz.ID = result.InsertedID.(primitive.ObjectID).Hex()
 	return quiz, err
 }
 
