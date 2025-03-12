@@ -80,6 +80,7 @@ func AddStats(userName string, quiz model.Quiz) {
 		return
 	}
 
+	user.Coins += 100 + 10*quiz.Mark
 	user.Experience += 10 + quiz.Mark
 	user.Stats.PlayedQuizzes += 1
 	user.Stats.CorrectResponses += quiz.Mark

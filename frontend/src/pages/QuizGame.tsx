@@ -138,6 +138,7 @@ const QuizGame = () => {
       const updatedMark = mark + (selectedChoice === correctAnswer ? 1 : 0);
       if (user && updateUser) {
         updateUser({ ...user, 
+          Coins: user.Coins + 100 + updatedMark * 10,
           Stats: { 
             ...user.Stats, 
             quizzes_played: user.Stats.quizzes_played + 1, 
