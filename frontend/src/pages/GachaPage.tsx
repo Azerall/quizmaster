@@ -156,8 +156,8 @@ const GachaPage = () => {
                     boxShadow: "0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.8)",
                   },
                   6: {
-                    background: "#4B0082", // Indigo
-                    boxShadow: "0 0 15px rgba(75, 0, 130, 0.8), 0 0 30px rgba(75, 0, 130, 0.8)",
+                    background: "#7628FF", // Indigo
+                    boxShadow: "0 0 15px rgba(118, 40, 255, 0.8), 0 0 30px rgb(118, 40, 255, 0.8)",
                   },
 
                 };
@@ -167,7 +167,7 @@ const GachaPage = () => {
                 return (
                   <img
                     key={index}
-                    src={`/images/cheatsheets/rarity${reward === 6 ? 'AI' : reward}.png`}
+                    src={`/images/cheatsheets/rarity${reward}.png`}
                     alt={`Reward ${reward}`}
                     className="w-24 h-24 m-2 rounded-lg shadow-md"
                     style={style}

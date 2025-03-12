@@ -33,7 +33,7 @@ const MainPage = () => {
   return (
     <div className="h-screen pt-[100px] flex flex-col bg-transparent">
       {/* Contenu principal */}
-      <div className="flex flex-col items-center pt-8 pb-4 flex-grow">
+      <div className="flex flex-col items-center pt-4 pb-4 flex-grow">
         <div className="relative w-full max-w-sm">
           <div
             className="w-full h-48 bg-cover bg-center rounded-t-lg"
