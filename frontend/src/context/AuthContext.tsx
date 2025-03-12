@@ -81,14 +81,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return await fetch(`http://localhost:8080${endpoint}`, options);
     };
 
-    // Fonction pour calculer le niveau en fonction de l'expérience
+// Fonction pour calculer le niveau en fonction de l'expérience
     const calculateLevel = (experience?: number) => {
         if (!experience) {
             return 1;
         }
-        const level = Math.max(1, Math.floor(2 * Math.log(experience) - 4));
+        const level = Math.max(1, 3 * Math.floor(Math.log(10*experience) - 4));
         return level;
-    }
+    };
 
     return (
         <AuthContext.Provider value={{ token, user, login, logout, updateUser, fetchFromBackend, calculateLevel }}>
