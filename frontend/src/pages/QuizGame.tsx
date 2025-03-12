@@ -65,8 +65,16 @@ const QuizGame = () => {
       endpoint += `?username=${encodeURIComponent(user?.Username || "")}&categoryname=${encodeURIComponent(selectedCategory)}`;
     }
 
+    let body = null;
+    if (method === "POST") {
+      body = JSON.stringify({
+        username: user?.Username,
+        categoryname: selectedCategory,
+      });
+    }
+
     try {
-      const response = await fetchFromBackend(endpoint, method);
+      const response = await fetchFromBackend(endpoint, method, body);
       const data = await response.json();
       
       if (!response.ok) {
@@ -79,6 +87,10 @@ const QuizGame = () => {
       setCorrectAnswer(data.data.Questions[data.data.Number_question].response_correct);
       setQuizID(data.data.ID);
       setSelectedChoice(null);
+
+      if (data.message === "Quiz récupéré avec succès") {
+        alert("Vous aviez déjà commencé un quiz. Vous reprennez à la question n°" + (data.data.Number_question+1));
+      }
     } catch (error) {
       console.error("Erreur lors de la requête:", error);
     }
@@ -123,13 +135,14 @@ const QuizGame = () => {
       setChat([]);
     } else {
       setShowResults(true);
+      const updatedMark = mark + (selectedChoice === correctAnswer ? 1 : 0);
       if (user && updateUser) {
         updateUser({ ...user, 
           Stats: { 
             ...user.Stats, 
             quizzes_played: user.Stats.quizzes_played + 1, 
-            correct_responses: user.Stats.correct_responses + mark,
-            full_marks: mark === questions.length ? user.Stats.full_marks + 1 : user.Stats.full_marks,
+            correct_responses: user.Stats.correct_responses + updatedMark,
+            full_marks: updatedMark === questions.length ? user.Stats.full_marks + 1 : user.Stats.full_marks,
           } 
         });
       }
@@ -185,7 +198,11 @@ const QuizGame = () => {
       if (data.status === 200) {
         const botMessage = { sender: "bot", text: data.data };
         setChat((prevChat) => [...prevChat, botMessage]);
-      } else {
+      } else if (data.status === 500) {
+        const botMessage = { sender: "bot", text: "Désolé, la limite de requêtes a été atteinte. Veuillez réessayer plus tard." };
+        setChat((prevChat) => [...prevChat, botMessage]);
+      }
+      else {
         console.error("Erreur API:", data.message);
       }
     } catch (error) {
