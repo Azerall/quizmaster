@@ -152,14 +152,16 @@ func CreateQuestionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Shuffle(questions []model.Question) []model.Question {
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(questions), func(i, j int) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// Mélanger les questions
+	r.Shuffle(len(questions), func(i, j int) {
 		questions[i], questions[j] = questions[j], questions[i]
 	})
 
+	// Mélanger les réponses de chaque question
 	for i, question := range questions {
-		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(question.Responses), func(i, j int) {
+		r.Shuffle(len(question.Responses), func(i, j int) {
 			question.Responses[i], question.Responses[j] = question.Responses[j], question.Responses[i]
 		})
 		questions[i] = question

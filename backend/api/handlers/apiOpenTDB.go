@@ -7,9 +7,7 @@ import (
 	"html"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"quizmaster/db"
-	"time"
 
 	"net/http"
 	"quizmaster/model"
@@ -116,11 +114,6 @@ func GenerateQuiz(userName string, category string) model.Quiz {
 		}
 
 		allAnswers := append(incorrectAnswers, html.UnescapeString(correctAnswer))
-		// Mélange des réponses
-		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(allAnswers), func(i, j int) {
-			allAnswers[i], allAnswers[j] = allAnswers[j], allAnswers[i]
-		})
 
 		quiz.Questions = append(quiz.Questions, model.Question{
 			QuestionText:    html.UnescapeString(questionText),
@@ -128,6 +121,9 @@ func GenerateQuiz(userName string, category string) model.Quiz {
 			ResponseCorrect: html.UnescapeString(correctAnswer),
 		})
 	}
+
+	// Mélanger les questions et leurs réponses
+	quiz.Questions = Shuffle(quiz.Questions)
 
 	quiz.Username = userName
 	quiz.Mark = 0
