@@ -55,10 +55,38 @@ export const AuthForm = ({ isSignup }: AuthFormProps) => {
           </span>
         </div>
 
-                <div className="button-group">
-                    <Link to="/signup" className={isSignup ? "active" : ""}>Sign up</Link>
-                    <Link to="/signin" className={!isSignup ? "active" : ""}>Sign in</Link>
-                </div>
+        <div className="button-group" style={{ display: 'flex', marginBottom: '24px' }}>
+            <Link 
+                to="/signup" 
+                className={isSignup ? "active" : ""}
+                style={{
+                padding: '8px 16px',
+                textDecoration: 'none',
+                color: 'white',
+                backgroundColor: isSignup ? '#E470A3' : '#292047',
+                border: '2px solid #E470A3', // Contour rose
+                borderRight: 'none', // Supprime le contour droit pour coller au bouton suivant
+                borderRadius: '8px 0 0 8px', // Coins arrondis à gauche seulement
+                }}
+            >
+                Sign up
+            </Link>
+            <Link 
+                to="/signin" 
+                className={!isSignup ? "active" : ""}
+                style={{
+                padding: '8px 16px',
+                textDecoration: 'none',
+                color: 'white',
+                backgroundColor: !isSignup ? '#E470A3' : '#292047',
+                border: '2px solid #E470A3', // Contour rose
+                borderLeft: 'none', // Supprime le contour gauche pour coller au bouton précédent
+                borderRadius: '0 8px 8px 0', // Coins arrondis à droite seulement
+                }}
+            >
+                Sign in
+            </Link>
+        </div>
 
                 <form onSubmit={handleSubmit} className="auth-form">
                     <label style={{ color: "white" }}>Username</label>
