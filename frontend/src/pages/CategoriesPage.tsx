@@ -126,7 +126,7 @@ const CategoriesPage = () => {
       )}
 
       <button
-        onClick={() => navigate("/create-category")}
+        onClick={() => navigate("/quizmaster/create-category")}
         className="mt-10 bg-[#E470A3] text-white px-6 py-3 rounded-lg text-lg font-bold hover:scale-105 transition"
         style={{
           background: "linear-gradient(90deg, #E470A3, #9A60D1)",

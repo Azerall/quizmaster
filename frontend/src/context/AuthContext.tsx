@@ -53,14 +53,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = (newToken: string) => {
         setToken(newToken);
         localStorage.setItem("token", newToken);
-        navigate("/dashboard"); // Redirige après connexion
+        navigate("/quizmaster/dashboard"); // Redirige après connexion
     };
     
     const logout = () => {
         setToken(null);
         setUser(null);
         localStorage.removeItem("token");
-        navigate("/signin"); // Redirige après déconnexion
+        navigate("/quizmaster/signin"); // Redirige après déconnexion
     };
 
     const fetchFromBackend = async (endpoint: string, method: string = "GET", body?: any) => {

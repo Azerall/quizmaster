@@ -7,11 +7,11 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/signin");
+    navigate("/quizmaster/signin");
   };
 
   const handleLogoClick = () => {
-    navigate("/dashboard");
+    navigate("/quizmaster/dashboard");
   };
 
   // Fonction pour vérifier si le lien est actif

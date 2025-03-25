@@ -239,7 +239,7 @@ const QuizGame = () => {
               style={{
                 boxShadow: "0px 4px 15px rgba(228, 112, 163, 0.6), 0px 0px 25px rgba(228, 112, 163, 0.4)",
               }}
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/quizmaster/dashboard")}
             >
               Terminer
             </button>

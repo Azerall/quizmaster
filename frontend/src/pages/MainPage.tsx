@@ -81,7 +81,7 @@ const MainPage = () => {
   
         <div className="mt-12">
           <button
-            onClick={() => navigate("/quizzes")}
+            onClick={() => navigate("/quizmaster/quizzes")}
             className="px-12 py-5 text-2xl font-bold text-white rounded-lg transition-transform transform hover:scale-105"
             style={{
               background: "linear-gradient(90deg, #E470A3, #9A60D1)",

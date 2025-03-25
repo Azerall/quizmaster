@@ -121,7 +121,7 @@ const CreateCategoryPage = () => {
 
         alert("Catégorie créée avec succès !");
       }
-      navigate("/quizzes");
+      navigate("/quizmaster/quizzes");
     } catch (error) {
       console.error(error);
       //alert("Une erreur s'est produite.");
@@ -213,7 +213,7 @@ const CreateCategoryPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/quizzes")}
+                onClick={() => navigate("/quizmaster/quizzes")}
                 className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition"
                 style={{
                   boxShadow: "0px 4px 15px rgba(128, 128, 128, 0.6), 0px 0px 25px rgba(128, 128, 128, 0.4)",
