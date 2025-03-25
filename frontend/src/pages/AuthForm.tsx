@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import logo from '../assets/logo.png';
 
 interface AuthFormProps {
     isSignup: boolean;
@@ -46,7 +47,7 @@ export const AuthForm = ({ isSignup }: AuthFormProps) => {
                  
                  <div className="flex items-center justify-center gap-4 mb-6 p-1">
           <img
-            src="/src/assets/logo.png"
+            src={logo}
             alt="Logo Quiz Master"
             className="w-17 h-17 object-contain"
           />
@@ -57,7 +58,7 @@ export const AuthForm = ({ isSignup }: AuthFormProps) => {
 
         <div className="button-group" style={{ display: 'flex', marginBottom: '24px' }}>
             <Link 
-                to="/signup" 
+                to="/quizmaster/signup" 
                 className={isSignup ? "active" : ""}
                 style={{
                 padding: '8px 16px',
@@ -72,7 +73,7 @@ export const AuthForm = ({ isSignup }: AuthFormProps) => {
                 Sign up
             </Link>
             <Link 
-                to="/signin" 
+                to="/quizmaster/signin" 
                 className={!isSignup ? "active" : ""}
                 style={{
                 padding: '8px 16px',

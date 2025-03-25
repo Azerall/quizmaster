@@ -62,13 +62,13 @@ const CategoriesPage = () => {
   }, [user]);
 
   const handleCategoryClick = (category: string) => {
-    navigate(`/quiz`, {
+    navigate(`/quizmaster/quiz`, {
       state: { selectedCategory: category, allCategories: categories },
     });
   };
 
   const handleModifyCategory = (category: Category) => {
-    navigate(`/create-category`, {
+    navigate(`/quizmaster/create-category`, {
       state: { selectedCategory: category },
     });
   }
@@ -113,7 +113,7 @@ const CategoriesPage = () => {
                             title="Modifier la catégorie"
                         >
                             <img
-                                src="/images/modify_category.png"
+                                src="/quizmaster/images/modify_category.png"
                                 alt="Modifier"
                                 className="w-5 h-5"
                             />

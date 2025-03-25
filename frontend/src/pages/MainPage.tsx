@@ -48,7 +48,7 @@ const MainPage = () => {
                 }}
               >
                 <img
-                  src={user?.Picture}
+                  src={"/quizmaster/"+user?.Picture}
                   alt="Profil"
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -114,7 +114,7 @@ const MainPage = () => {
                     #{index + 1}
                   </span>
                   <img
-                    src={player.Picture || "/images/profils/default.png"}
+                    src={"/quizmaster/"+player.Picture}
                     alt={`${player.Username} profile`}
                     className="w-16 h-16 rounded-full object-cover border border-white mb-2"
                   />

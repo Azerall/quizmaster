@@ -68,7 +68,7 @@ const GachaPage = () => {
       
         <div className="flex flex-col items-center relative z-0">
           <img
-            src="/images/gacha_machine.png"
+            src="/quizmaster/images/gacha_machine.png"
             alt="Gacha Machine"
             width={600}
             height={600}
@@ -167,7 +167,7 @@ const GachaPage = () => {
                 return (
                   <img
                     key={index}
-                    src={`/images/cheatsheets/rarity${reward}.png`}
+                    src={`/quizmaster/images/cheatsheets/rarity${reward}.png`}
                     alt={`Reward ${reward}`}
                     className="w-24 h-24 m-2 rounded-lg shadow-md"
                     style={style}

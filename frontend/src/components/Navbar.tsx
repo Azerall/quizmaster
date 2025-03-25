@@ -27,10 +27,10 @@ const Navbar = () => {
 
       {/* Liens de navigation */}
       <div className="flex items-center space-x-6">
-        <NavLink to="/" active={isActive("/")}>Accueil</NavLink>
-        <NavLink to="/quizzes" active={isActive("/quizzes")}>Quizzes</NavLink>
-        <NavLink to="/profil" active={isActive("/profil")}>Profil</NavLink>
-        <NavLink to="/gacha" active={isActive("/gacha")}>Gacha</NavLink>
+        <NavLink to="/quizmaster/" active={isActive("/quizmaster/")}>Accueil</NavLink>
+        <NavLink to="/quizmaster/quizzes" active={isActive("/quizmaster/quizzes")}>Quizzes</NavLink>
+        <NavLink to="/quizmaster/profil" active={isActive("/quizmaster/profil")}>Profil</NavLink>
+        <NavLink to="/quizmaster/gacha" active={isActive("/quizmaster/gacha")}>Gacha</NavLink>
 
         {/* Bouton Déconnexion avec Icône */}
         <button onClick={handleLogout} className="ml-4">

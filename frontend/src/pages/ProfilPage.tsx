@@ -10,10 +10,15 @@ const ProfilPage = () => {
   const [profileImages, setProfileImages] = useState<string[]>([]);
 
   useEffect(() => {
-    // Importer toutes les images de profils
-    const images = import.meta.glob('/src/assets/profils/*.{png,jpg,jpeg,gif}', { eager: true });
-    const imageUrls = Object.values(images).map((mod: any) => mod.default);
-    setProfileImages(imageUrls);
+    // Construire les URLs des images directement depuis le dossier public
+    const imageFilenames = [
+      "aventurine.png", "blade.png", "boothill.png", "dan_heng.png",
+      "feixiao.png", "firefly.png", "jing_yuan.png", "jingliu.png",
+      "kafka.png", "robin.png", "ruan_mei.png", "silver_wolf.png",
+      "sparkle.png", "sunday.png", "the_herta.png"
+    ];
+    const basePath = "/quizmaster/src/assets/profils/";
+    setProfileImages(imageFilenames.map(name => basePath + name));
   }, []);
 
   useEffect(() => {
@@ -83,7 +88,7 @@ const ProfilPage = () => {
                 }}
               >
                 <img
-                  src={user?.Picture}
+                  src={"/quizmaster/"+user?.Picture}
                   alt="Profil"
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -99,7 +104,7 @@ const ProfilPage = () => {
                 {user?.Picture && (
                   <img
                     key={user.Picture}
-                    src={user.Picture}
+                    src={"/quizmaster/"+user.Picture}
                     alt={`Option courante ${user.Picture.split('/').pop()?.split('.').shift() || "Photo"}`}
                     className="w-16 h-16 rounded-full object-cover cursor-pointer"
                     style={{
@@ -151,7 +156,7 @@ const ProfilPage = () => {
                         onClick={handleSaveUsername}
                         className="bg-[#E470A3] hover:bg-[#D65F8F] text-white rounded-lg px-2 py-2"
                       >
-                        <img src="/images/modify.png" alt="✏" className="w-5 h-5" />
+                        <img src="/quizmaster/images/modify_category.png" alt="✏" className="w-5 h-5" />
                       </button>
                     </>
                   ) : (
@@ -161,7 +166,7 @@ const ProfilPage = () => {
                         onClick={() => setEditUsername(true)}
                         className="bg-transparent text-white hover:text-[#E470A3] p-1 cursor-pointer"
                       >
-                        <img src="/images/modify.png" alt="Modifier" className="w-5 h-5" />
+                        <img src="/quizmaster/images/modify.png" alt="Modifier" className="w-5 h-5" />
                       </button>
                     </>
                   )}
@@ -180,7 +185,7 @@ const ProfilPage = () => {
                   {user?.Inventory.map((item, index) => (
                     <div key={index} className="flex items-center gap-4">
                       <img
-                        src={`/images/cheatsheets/rarity${item.rarity}.png`}
+                        src={`/quizmaster/images/cheatsheets/rarity${item.rarity}.png`}
                         alt={`Cheat ${index + 1}`}
                         className="w-16 h-16 object-cover"
                       />

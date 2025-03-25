@@ -342,7 +342,7 @@ const QuizGame = () => {
           >
             <div className="mr-4">
               <img
-                src={`/images/cheatsheets/rarity${cheatsheet.rarity}.png`}
+                src={`/quizmaster/images/cheatsheets/rarity${cheatsheet.rarity}.png`}
                 alt="Cheatsheet"
                 className="w-20 h-20 rounded-lg"
                 style={{ background: "transparent" }}
