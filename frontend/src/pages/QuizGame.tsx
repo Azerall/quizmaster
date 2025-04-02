@@ -86,6 +86,7 @@ const QuizGame = () => {
       setChoices(data.data.Questions[data.data.Number_question].responses);
       setCorrectAnswer(data.data.Questions[data.data.Number_question].response_correct);
       setQuizID(data.data.ID);
+      setMark(data.data.Mark);
       setSelectedChoice(null);
 
       if (data.message === "Quiz récupéré avec succès") {

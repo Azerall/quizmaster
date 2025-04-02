@@ -77,7 +77,7 @@ const ProfilPage = () => {
           {/* Partie haute avec tiles.jpg et options d'images */}
           <div
             className="w-full h-48 bg-cover bg-center rounded-t-lg relative"
-            style={{ backgroundImage: "url('/images/tiles.jpg')" }}
+            style={{ backgroundImage: "url('/quizmaster/images/tiles.jpg')" }}
           >
             {/* Image de profil centrée cliquable */}
             <div className="absolute top-7 left-1/2 transform -translate-x-1/2">
