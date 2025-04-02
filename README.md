@@ -9,29 +9,47 @@ Cependant, pour un usage complet, le backend doit être lancé localement.
 
 ---
 
+## 🏆 Fonctionnalités principales
+
+✅ Jouer à des quiz existants  
+✅ Créer et partager des quiz  
+✅ Gagner des niveaux et des récompenses  
+✅ Obtenir des antisèches avec un système de loterie  
+✅ Classement des utilisateurs  
+✅ Profil personnalisable (nom d’utilisateur et avatar)  
+
+---
+
 ## 🛠 Technologies utilisées
 
 - **Frontend** : React + Vite  
 - **Backend** : Go  
-- **Base de données** : MongoDB  
-- **APIs externes** :  
-  - [Open Trivia DB](https://opentdb.com/) (Génération de quiz par défaut)  
-  - [AI/ML API](https://aimlapi.com/) (Chatbot intelligent)  
+- **Base de données** : MongoDB   
 - **Conteneurisation** : Docker  
+
+---
+
+## 🌐 APIs externes utilisées
+
+- [Open Trivia DB](https://opentdb.com/) (Génération de quiz par défaut)  
+- [AI/ML API](https://aimlapi.com/) (Chatbot intelligent)  
 
 ---
 
 ## ⚙️ Prérequis
 
 Avant de lancer l'application, assurez-vous d'avoir installé :  
-- **Docker** (si vous souhaitez utiliser l’option Docker)  
+- **Docker** (si vous souhaitez lancer avec Docker)  
 - **Golang 1.23+**  
 - **Node.js 18+**  
-- **MongoDB** (si vous ne passez pas par Docker)  
 
 ---
 
 ## 🚀 Lancer l’application
+
+Après le lancement, le frontend sera disponible localement via :   [http://localhost:5173/quizmaster/](http://localhost:5173/quizmaster/)
+
+Le backend écoutera sur le port **8080**.
 
 ### Avec Docker (recommandé)
 
@@ -61,8 +79,6 @@ Cela démarre à la fois le backend et le frontend dans des conteneurs configur�
    ```sh
    npm run dev
    ```
-4. Accéder à l’application via :  
-   [http://localhost:5173/quizmaster/dashboard](http://localhost:5173/quizmaster/)
 
 ---
 
@@ -75,18 +91,6 @@ Cela démarre à la fois le backend et le frontend dans des conteneurs configur�
    ```sh
    go run main.go
    ```
-3. Le backend écoutera sur le port **8080**.
-
----
-
-## 🏆 Fonctionnalités principales
-
-✅ Jouer à des quiz existants  
-✅ Créer et partager des quiz  
-✅ Gagner des niveaux et des récompenses  
-✅ Obtenir des antisèches avec un système de loterie  
-✅ Classement des utilisateurs  
-✅ Profil personnalisable (nom d’utilisateur et avatar)  
 
 ---
 
