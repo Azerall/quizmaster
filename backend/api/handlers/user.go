@@ -81,7 +81,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Initialisation des valeurs par défaut
 	newUser.Experience = 0
-	newUser.Coins = 100
+	newUser.Coins = 1000
 	newUser.Inventory = []model.CheatSheet{
 		{Rarity: 3, Quantity: 1},
 		{Rarity: 4, Quantity: 1},
