@@ -94,4 +94,13 @@ Cela démarre à la fois le backend et le frontend dans des conteneurs configur�
 
 ---
 
+## 👨‍💻 Développeurs
+
+Ce projet a été développé par :  
+- [Dilyara Babanazarova](https://github.com/DilyaraB)  
+- [Floria Lim](https://github.com/Azerall)  
+- [Julien Fang](https://github.com/Julien-Fang)  
+
+---
+
 **🚀 Amusez-vous bien avec Quiz Master ++ ! 🎉**
