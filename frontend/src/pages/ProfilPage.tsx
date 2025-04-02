@@ -50,15 +50,16 @@ const ProfilPage = () => {
   const handleSavePicture = async (newPicture: string) => {
     if (updateUser && user?.ID) {
       try {
+        const sanitizedPicture = newPicture.replace(/^\/quizmaster/, "");
         const response = await fetchFromBackend(`/api/user/changePicture/${user.ID}`, "PUT", JSON.stringify({
-          newPicture: newPicture,
+          newPicture: sanitizedPicture,
         }));
         if (response.ok) {
           const data = await response.json();
           console.log(data);
           updateUser({
             ...user,
-            Picture: newPicture,
+            Picture: sanitizedPicture,
           });
         }
       } catch (error) {

@@ -1,5 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import logo from '../assets/logo.png';
+import logout from '../assets/logout.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 w-screen bg-[#292047] p-4 flex justify-between items-center z-50 ">
       {/* Logo et Titre */}
       <div className="flex items-center space-x-3 cursor-pointer" onClick={handleLogoClick}>
-        <img src="/quizmaster/src/assets/logo.png" alt="Logo" className="h-10 w-10" />
+        <img src={logo} alt="Logo" className="h-10 w-10" />
         <span className="text-[#E370A2] text-2xl font-bold chevadisplay-font">QUIZ MASTER ++</span>
       </div>
 
@@ -34,7 +36,7 @@ const Navbar = () => {
 
         {/* Bouton Déconnexion avec Icône */}
         <button onClick={handleLogout} className="ml-4">
-          <img src="/quizmaster/src/assets/logout.png" alt="Déconnexion" className="h-8 w-8 hover:opacity-80 transition-opacity cursor-pointer" />
+          <img src={logout} alt="Déconnexion" className="h-8 w-8 hover:opacity-80 transition-opacity cursor-pointer" />
         </button>
       </div>
     </nav>
